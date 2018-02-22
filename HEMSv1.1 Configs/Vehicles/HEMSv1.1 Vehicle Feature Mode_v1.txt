@@ -1,0 +1,40 @@
+////Geofence Enable/Disable
+//$PFAL,Sys.nvCounter1.Set=1
+////Sleep Mode Enable/Disable
+//$PFAL,Sys.nvCounter10.Set=1
+////Tagin Enable/DIsable
+//$PFAL,Sys.nvCounter3.Set=1
+////Idling Enable/Disable
+//$PFAL,Sys.nvCounter4.Set=1
+////Towing Enable
+//$PFAL,Sys.nvCounter6.Set=0
+////Towing Disable
+//$PFAL,Sys.nvCounter6.Set=9 
+////Overspeed Enable
+//$PFAL,Sys.nvCounter7.Set=0
+////Overspeed Disable
+//$PFAL,Sys.nvCounter7.Set=9
+////Power Status Enable
+//$PFAL,Sys.nvCounter8.Set=0
+////Power Status Disable
+//$PFAL,Sys.nvCounter8.Set=9
+////TCP Disconnection Reboot(added this with powerup)
+//$PFAL,Sys.nvCounter2.Set=1
+////Ignition Enable/Disable
+//$PFAL,Sys.nvCounter0.Set=1
+
+//Overspeed setting as per customer requirement needs to be set in m/s onto nvCounter 11
+$PFAL,CNF.Set,AL0=Sys.Counter.s0>=1&Sys.nvCounter.s11=0:Sys.nvCounter11.Set=34
+
+//Asset Features
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter3.Set=1&Sys.nvCounter4.Set=1&Sys.nvCounter6.Set=0
+$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter7.Set=0&Sys.nvCounter8.Set=0&Sys.nvCounter0.Set=1
+
+//Baudrate change
+$PFAL,CNF.Set,DEVICE.SERIAL0.BAUDRATE=38400
+
+////////////////////////Backup
+$PFAL,CNF.Backup
+
+//RFID Mode
+$PFAL,MSG.Mode.SERIAL0=40,B

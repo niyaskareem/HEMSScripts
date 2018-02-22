@@ -1,0 +1,41 @@
+////Geofence Enable/Disable
+//$PFAL,Sys.nvCounter1.Set=1
+////Sleep Mode Enable/Disable (added along with Powerup)
+//$PFAL,Sys.nvCounter10.Set=1
+////Tagin Enable/DIsable
+//$PFAL,Sys.nvCounter3.Set=1
+////Idling Enable/Disable
+//$PFAL,Sys.nvCounter4.Set=1
+////Towing Enable
+//$PFAL,Sys.nvCounter6.Set=0
+////Towing Disable
+//$PFAL,Sys.nvCounter6.Set=9 
+////Overspeed Enable
+//$PFAL,Sys.nvCounter7.Set=0
+////Overspeed Disable
+//$PFAL,Sys.nvCounter7.Set=9
+////Power Status Enable
+//$PFAL,Sys.nvCounter8.Set=0
+////Power Status Disable
+//$PFAL,Sys.nvCounter8.Set=9
+////TCP Disconnection Reboot (added along with Powerup)
+//$PFAL,Sys.nvCounter2.Set=1
+////Fault code Handler
+//$PFAL,Sys.nvCounter13.Set=1
+////Ignition Enable/Disable
+//$PFAL,Sys.nvCounter0.Set=1
+
+
+//Change the overspeed value in m/s to NVCOUNTER11 in the below command
+//Feature enabler
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter3.Set=1&Sys.nvCounter4.Set=1&Sys.nvCounter6.Set=0&Sys.nvCounter11.Set=34
+$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter7.Set=1&Sys.nvCounter8.Set=1&Sys.nvCounter12.Set=0&Sys.nvCounter13.Set=1&Sys.nvCounter0.Set=1
+
+//Baudrate change for RFID
+$PFAL,CNF.Set,DEVICE.SERIAL0.BAUDRATE=38400
+
+//Backup
+$PFAL,CNF.Backup
+
+//Serial mode change to RFID
+$PFAL,MSG.Mode.SERIAL0=40,B

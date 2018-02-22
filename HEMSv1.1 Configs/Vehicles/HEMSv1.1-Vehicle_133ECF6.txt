@@ -1,0 +1,323 @@
+//133ECED								:	First Build
+//133ECEE								:	Added condition to prevent towing while ignition is filtered
+//										:	Resolved an issue where If tagged in and the device boots up, tagout timer and pin timer is started for 5s
+//133ECEF								:	Seperated RPM based Ignition logic from Analog Vehicles
+//										:	Added Ignition filter when Journey periodic is sent to prevent false periodic message	
+//										:	Resolved a minor issue where there might not be a tagout if he tag in while keeping the ACC On without starting the vehicle
+//										:	Resolved a bug where ignition status counter was wrongly mapped in REPLACE0,REPLACE4 and REPLACE5
+//										:	Added heading tolerance angle
+//133ECF3 								:	Added one second timer
+//133ECF5								:	Resolved an issue where Multiple tagin before tagout results in a fake tag in and added tagout timer with every tap of the card
+//										:	Resolved a minor issue where boot reason in power up message was mapped wrong in the message format
+//133ECF6 								:	Added tagout in case if the asset is in different mode
+
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Vehicle_133ECF6
+
+// ALIAS I/O mapping :
+$PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
+$PFAL,CNF.Set,ALIAS.IO12=_GSMLED
+$PFAL,CNF.Set,ALIAS.IO13=_PWRLED
+
+//Orange LED (Asset config mode check)
+//Stable (Asset Mode not configured)
+$PFAL,CNF.Set,AL62=Sys.nvCounter.s0=0&IO.s11=Low:IO_DIAGLED.Set=High
+$PFAL,CNF.Set,AL65=Sys.nvCounter.S0>0&IO.s11=High:IO_DIAGLED.Set=Low
+
+//MACROS
+//Power up timer
+$PFAL,CNF.Set,MACRO0=Sys.Timer2.Start=Single,180000
+//Periodic timer (Journey/CAN)
+$PFAL,CNF.Set,MACRO1=Sys.Timer3.Start=Cyclic,300000
+//Sleep timer
+$PFAL,CNF.Set,MACRO2=Sys.Timer5.Start=Single,14400000
+//Idling timer
+$PFAL,CNF.Set,MACRO3=Sys.Timer8.Start=Single,900000
+//Towing periodic
+$PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
+//Position report timer
+$PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,3600000
+
+// ROAM settings:
+$PFAL,CNF.Set,GSM.OPERATOR.SELECTION=auto
+$PFAL,CNF.Set,TCP.CLIENT.CONNECT=1,qaroam3.roamworks.com,6102
+$PFAL,CNF.Set,GPRS.APN=m2m
+
+//Replaces (Message formats)
+// MESSAGE FORMAT - no CAN, no Odometer (for PWRL,PWRR,TOW,POLLR,HEA):
+$PFAL,CNF.Set,REPLACE0=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),,&(Power),&(Vaccu),,,,&(nvCounter0),&(DOP),&(SatsUsed)
+
+// Message format for Analog/Canbus Assets
+$PFAL,Cnf.Set,REPLACE1=35 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),&(NavDist),&(Alt),&(Power),&(Bat),&(nvCounter0),&(Out0),&(DOP),&(SatsUsed),
+$PFAL,Cnf.Set,REPLACE2=&(IN2),
+$PFAL,Cnf.Set,REPLACE3=&(ANA1)
+
+//Message format for HEA,
+$PFAL,Cnf.Set,REPLACE4=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),,&(Power),&(Bat),,,,&(nvCounter0),&(DOP),&(SatsUsed)
+
+//Message format for TAGI
+$PFAL,Cnf.Set,REPLACE5=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),,&(Power),&(Bat),,,,&(nvCounter0),&(DOP),&(SatsUsed),&(SerialData0.End8)
+
+// Message format for Powerup
+$PFAL,Cnf.Set,REPLACE6=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),,&(Power),&(Vaccu),,,,&(nvCounter0),&(DOP),&(SatsUsed),,&(Counter0),&(DeviceName)
+
+//Message format for OSPS
+$PFAL,CNF.Set,REPLACE7=35 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(nvCounter11),&(NavDist),&(Alt),&(Power),&(Bat),&(nvCounter0),&(Out0),&(DOP),&(SatsUsed),
+
+//Message format for Poll response
+$PFAL,CNF.Set,REPLACE8=,&(nvCounter1),&(nvCounter10),&(nvCounter4),&(nvCounter6),&(nvCounter7),&(nvCounter8),&(nvCounter2),&(nvCounter3),&(nvCounter11),&(nvCounter12),&(nvCounter13)
+$PFAL,CNF.Set,REPLACE9=Sys.MACRO0&Sys.MACRO2&Sys.Timer16.Start=Cyclic,2000
+////Power up Handler (//Add Boot_counter,Device name,Immobilizer status,location info)
+
+$PFAL,CNF.Set,AL1=Sys.Device.eStart=PowerUp:Sys.Counter0.set=1&(REPLACE9)
+$PFAL,CNF.Set,AL2=Sys.Device.eStart=Reset,USER1:Sys.Counter0.set=2&(REPLACE9)
+$PFAL,CNF.Set,AL3=Sys.Device.eStart=Reset,USER2:Sys.Counter0.set=3&(REPLACE9)
+$PFAL,CNF.Set,AL4=Sys.Device.eStart=Wakeup,Ign?Sys.Device.eStart=Wakeup,Timer?Sys.Device.eStart=Wakeup,Ring:Sys.Counter0.set=4&(REPLACE9)
+$PFAL,CNF.Set,AL5=Sys.Device.eStart=Wakeup,ExtPwrDrop:Sys.Counter0.set=5&(REPLACE9)
+$PFAL,CNF.Set,AL6=Sys.Device.eStart=Reset,GSM_CCE1:Sys.Counter0.set=6&(REPLACE9)
+$PFAL,CNF.Set,AL7=Sys.Device.eStart=Reset,Watchdog0?Sys.Device.eStart=Reset,Watchdog1?Sys.Device.eStart=Reset,Watchdog2?Sys.Device.eStart=Reset,Watchdog3?Sys.Device.eStart=Reset,Watchdog4:Sys.Counter0.set=7&(REPLACE9)
+$PFAL,CNF.Set,AL8=Sys.Device.eStart=Reset,Watchdog5?Sys.Device.eStart=Reset,Watchdog5?Sys.Device.eStart=Reset,Watchdog6:Sys.Counter0.set=7&(REPLACE9)
+$PFAL,CNF.Set,AL9=Sys.Counter.s0>=1&Sys.Timer.e2:TCP.Client.Send,0,"PWRUP (REPLACE6)"&Sys.nvCounter2.Set=1
+//To retain the status in case unit reboot in between journey
+$PFAL,CNF.Set,AL10=Sys.Device.eStart&Sys.nvCounter.s0=2:Sys.MACRO1&Sys.Timer5.Stop&Sys.Timer13.stop&GPS.Nav.Distance.Load&EcoDrive.TripStart
+$PFAL,CNF.Set,AL11=Sys.Device.eStart&Sys.nvCounter.s0=1&Sys.nvCounter.s3=2:Sys.Timer7.Start=Single,5000&Sys.Timer6.Start=Single,5000&IO4.Set=High
+$PFAL,CNF.Set,AL12=Sys.Device.eStart=Reset,USER0:Sys.Counter0.set=8&(REPLACE9)
+////Power status Handler
+$PFAL,CNF.Set,AL13=Sys.Power.sVoltage<9&Sys.nvCounter.s8<7:Sys.nvCounter8.Increment=1
+$PFAL,CNF.Set,AL14=Sys.Power.sVoltage>8&Sys.Power.sVoltage<9&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRL (REPLACE0)"
+$PFAL,CNF.Set,AL15=Sys.Power.sVoltage>10&Sys.nvCounter.s8=8:Sys.nvCounter8.Set=0&TCP.Client.Send,0,"PWRR (REPLACE0)"
+$PFAL,CNF.Set,AL16=Sys.Power.sVoltage<1&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRD (REPLACE0)"
+
+////Ignition on/off Handler
+//Ignition Detection Logic (Driver has to turn the key all the way off for Ignition Off-Refer Document)
+$PFAL,CNF.Set,AL17=IO.s8=High&IO.s2=High&Sys.Trigger.s1=Low:Sys.Trigger1=High
+$PFAL,CNF.Set,AL18=IO.s8=Low&Sys.Trigger.s1=High&IO.s2=Low:Sys.Trigger1=Low
+$PFAL,CNF.Set,AL19
+$PFAL,CNF.Set,AL20
+$PFAL,CNF.Set,AL21
+
+$PFAL,IO2.Config=DI,3.0,8.0
+
+//Ignition ON/OFF Events
+$PFAL,CNF.Set,AL25=Sys.Trigger.s1=High&IO.s2=High&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
+$PFAL,CNF.Set,AL26=Sys.Trigger.s1=Low&IO.s2=Low&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
+$PFAL,CNF.Set,AL27=Sys.nvCounter.s5=8&Sys.nvCounter.s0=1:Sys.nvCounter0.set=2&Sys.MACRO1&Sys.Timer5.Stop&Sys.Timer13.stop&TCP.Client.Send,0,"IN8H (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL28=Sys.nvCounter.s5=8&Sys.nvCounter.s0=1:GPS.Nav.Distance.Load&Sys.Timer7.Stop&EcoDrive.TripStart&GPS.Nav.Position1=current
+$PFAL,CNF.Set,AL29=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:Sys.nvCounter0.set=1&Sys.Timer3.Stop&Sys.MACRO2&Sys.MACRO5&TCP.Client.Send,0,"IN8L (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL30=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:GPS.Nav.Distance.Save&Sys.Timer14.Start=Single,3000&Sys.Timer7.Start=Single,25000&EcoDrive.TripStop
+$PFAL,CNF.Set,AL31
+////Periodic Handler
+
+//$PFAL,CNF.Set,AL23=Sys.Timer.e3:TCP.Client.Send,0,"CANP (REPLACE1)(REPLACE2)(REPLACE3)" //Will be available on Asset type config file
+$PFAL,CNF.Set,AL32=Sys.nvCounter.s0=2&Sys.Timer.e3:TCP.Client.Send,0,"PER (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL33
+
+////Tagin/Out Handler
+//Master/Authorised IDs
+$PFAL,CNF.Set,AL34=Sys.eSerialData0.End="0B"?Sys.eSerialData0.End="36"?Sys.eSerialData0.End="F4"?Sys.eSerialData0.End="FD"?Sys.eSerialData0.End="F5":Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000
+//Ids Synced from ROAM and Other Authorised IDs
+$PFAL,CNF.Set,AL35=Sys.eSerialData0.End=Whitelist:Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000
+
+//Tagin
+$PFAL,CNF.Set,AL36=Sys.Counter.s3=1&Sys.nvCounter.s3=1:Sys.Counter3.clear&Sys.nvCounter3.Set=2&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
+$PFAL,CNF.Set,AL37=Sys.Timer.e6?Sys.Timer.e7?Sys.nvCounter.s3=7:IO4.Set=Low&Sys.Counter3.clear
+$PFAL,CNF.Set,AL38=Sys.nvCounter.s3=12?Sys.Counter.s3=1:IO4.Set=High
+$PFAL,CNF.Set,AL39=Sys.nvCounter.s0=2&Sys.Timer.s7=running:Sys.Timer7.Stop
+$PFAL,CNF.Set,AL40=Sys.Timer.e7&Sys.nvCounter.s3=2&IO.s2=Low:Sys.nvCounter3.Set=1&TCP.Client.Send,0,"TAGO (REPLACE1)(REPLACE2)(REPLACE3)"&MSG.Send.Serial0,0,"&(bin=0x01,0x21)"
+
+//Tagout even when the device is in other tag modes
+$PFAL,CNF.Set,AL47=Sys.Timer.e7&Sys.nvCounter.s3>6:MSG.Send.Serial0,0,"&(bin=0x01,0x21)"&TCP.Client.Send,0,"TAGO (REPLACE1)(REPLACE2)(REPLACE3)"
+
+$PFAL,CNF.Set,AL41=Sys.nvCounter.s3=6:Sys.nvCounter3.Set=7&TCP.Client.Send,0,"IMMOA (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL42=Sys.Counter.s3=1&Sys.nvCounter.s3=7&Sys.Timer.s7=inactive:Sys.Counter3.clear&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
+$PFAL,CNF.Set,AL43=Sys.nvCounter.s3=8:IO4.Set=Low&Sys.nvCounter3.Set=1&TCP.Client.Send,0,"IMMOR (REPLACE1)(REPLACE2)(REPLACE3)"
+
+$PFAL,CNF.Set,AL44=Sys.nvCounter.s3=11:Sys.nvCounter3.Set=12&TCP.Client.Send,0,"SERV (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL45=Sys.Counter.s3=1&Sys.nvCounter.s3=12&Sys.Timer.s7=inactive:Sys.Counter3.clear&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
+$PFAL,CNF.Set,AL46=Sys.nvCounter.s3=13:IO4.Set=Low&Sys.nvCounter3.Set=1&TCP.Client.Send,0,"NORM (REPLACE1)(REPLACE2)(REPLACE3)"
+
+////Geofence Handler
+$PFAL,CNF.Set,AL48=GPS.Geofence.eX=inside&Sys.nvCounter.s1=1:Sys.nvCounter1.Set=2&TCP.Client.Send,0,"GEOIN (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL49=GPS.Geofence.eX=outside&Sys.nvCounter.s1=2:Sys.nvCounter1.Set=1&TCP.Client.Send,0,"GEOEX (REPLACE1)(REPLACE2)(REPLACE3)"
+
+////Poll Handler
+//Poll response over GPRS
+$PFAL,CNF.Set,AL50=Sys.Counter.s2=1:Sys.Counter2.clear&TCP.Client.Send,0,"POLLR (REPLACE6)(REPLACE8)"
+//$PFAL,CNF.Set,AL27=Sys.Counter.s2=2:Sys.Counter2.clear&TCP.Client.Send,0,"POLLR (REPLACE2)(REPLACE3)"//Reserved for CAN Poll
+
+//Poll response over SMS
+$PFAL,CNF.Set,AL51=GSM.SMS.eIncoming.Text="POLL":GSM.SMS.Send,"&(SMSNumber)",0,"Poll response for &(IMEI)Location:&(Lat),&(Lon)Speed:&(Speed)Dist:&(NavDist)GPRS:&(GPRS)TCP:&(TCPClient)Operator:&(OperatorID)"
+$PFAL,CNF.Set,AL52=GSM.SMS.eIncoming.Text="CANPOLL":GSM.SMS.Send,"&(SMSNumber)",0,"Poll response for &(IMEI)Location:&(Lat),&(Lon)Speed:&(Speed)Dist:&(NavDist)GPRS:&(GPRS)TCP:&(TCPClient)Operator:&(OperatorID)DTC:&(CanMsg6)RPM:&(CAN3)"
+$PFAL,CNF.Set,AL53
+////LED Handler
+//Orange LED
+//Off
+$PFAL,CNF.Set,AL53=Sys.Timer.e16&Sys.Power.sVoltage<9&GPS.Nav.sFix=invalid&Sys.nvCounter.s0=1:IO_PWRLED.Set=Low
+//Single Short Blink
+$PFAL,CNF.Set,AL54=Sys.Timer.e16&Sys.Power.sVoltage>10&GPS.Nav.sFix=invalid&Sys.nvCounter.s0=1:IO_PWRLED.Set=cyclic,125,125,1
+//Double Short Blink
+$PFAL,CNF.Set,AL55=Sys.Timer.e16&Sys.Power.sVoltage>10&GPS.Nav.sFix=valid&Sys.nvCounter.s0=1:IO_PWRLED.Set=cyclic,125,125,2
+//Triple Short Blink
+$PFAL,CNF.Set,AL56=Sys.Timer.e16&Sys.Power.sVoltage<9&GPS.Nav.sFix=valid&Sys.nvCounter.s0=2:IO_PWRLED.Set=cyclic,125,125,3
+//Four Short Blink
+$PFAL,CNF.Set,AL57=Sys.Timer.e16&Sys.Power.sVoltage>10&GPS.Nav.sFix=invalid&Sys.nvCounter.s0=2:IO_PWRLED.Set=cyclic,125,125,4
+//Stable
+$PFAL,CNF.Set,AL58=Sys.Timer.e16&Sys.Power.sVoltage>10&GPS.Nav.sFix=valid&Sys.nvCounter.s0=2:IO_PWRLED.Set=High
+
+//Green LED
+//Off
+$PFAL,CNF.Set,AL59=Sys.Timer.e16&GSM.GPRS.sOffline&TCP.Client.sDisconnected:IO_GSMLED.Set=Low
+//Single Short Blinks
+$PFAL,CNF.Set,AL60=Sys.Timer.e16&GSM.GPRS.sOnline&TCP.Client.sDisconnected:IO_GSMLED.Set=cyclic,125,125,1
+//Stable
+$PFAL,CNF.Set,AL61=Sys.Timer.e16&GSM.GPRS.sOnline&TCP.Client.sConnected:IO_GSMLED.Set=High
+
+//$PFAL,CNF.Set,AL39=Sys.CAN.s3<1?:IO_CANLED.Set
+
+////Heartbeat Handler
+$PFAL,CNF.Set,AL63=GPS.Time.eHour=8?GPS.Time.eHour=20:Sys.Trigger4=High
+$PFAL,CNF.Set,AL64=Sys.Trigger.s4=High?Sys.Timer.e15:TCP.Client.Send,0,"HEA (REPLACE4)"&Sys.Trigger4=Low
+////Weekly Reboot Handler
+$PFAL,CNF.Set,AL66=GPS.Time.sWDay=5&GPS.Time.sHour=19&GPS.Time.sMinute=50&GPS.Time.eSecond=55:Sys.Trigger5=High
+$PFAL,CNF.Set,AL67=Sys.Trigger.s5=high&Sys.nvCounter.s0=1:Sys.Device.Reset,1
+$PFAL,CNF.Set,AL68=Sys.Device.eStart=Wakeup,Ign?Sys.Device.eStart=Wakeup,Timer?Sys.Device.eStart=Wakeup,Ring:Sys.Timer15.Start=Single,10000
+////Sleep Mode Handler
+$PFAL,CNF.Set,AL69=Sys.Timer.e5&Sys.nvCounter.s10=1:Sys.Device.Sleep=Ign+Ring+ExtPwrDrop+Timer=12:00:00&TCP.Client.Send,0,"Sleep Mode Started &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix)"
+$PFAL,CNF.Set,AL70=Sys.Device.eStart=Wakeup,Timer:Sys.Timer5.Start=Single,300000
+//Invalid Sleep safety
+$PFAL,CNF.Set,AL71=Sys.nvCounter.s0=2&Sys.Timer.s5=running:Sys.Timer5.Stop
+////Towing Handler
+
+$PFAL,CNF.Set,AL73=Sys.nvCounter.s0=1&GPS.Nav.sSpeed>6&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s6<7:Sys.nvCounter6.Increment=1
+$PFAL,CNF.Set,AL74=Sys.nvCounter.s6=7&Sys.nvCounter.s0=1:Sys.nvCounter6.Set=8&Sys.MACRO4&Sys.Timer5.Stop&TCP.Client.Send,0,"TOW (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL75=Sys.nvCounter.s6=8&GPS.Nav.sSpeed<1:Sys.nvCounter6.Set=0&Sys.Timer9.Stop&Sys.MACRO2
+$PFAL,CNF.Set,AL76=Sys.nvCounter.s6=8&Sys.nvCounter.s0=2:Sys.nvCounter6.Set=0&Sys.Timer9.Stop
+$PFAL,CNF.Set,AL77=Sys.Timer.e9&Sys.nvCounter.s6=8:TCP.Client.Send,0,"TOWP (REPLACE1)(REPLACE2)(REPLACE3)"
+////Position Report
+
+$PFAL,GPS.Nav.SetHeadingTolerance=90
+$PFAL,CNF.Set,AL79
+$PFAL,CNF.Set,AL80=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&GPS.Nav.eChangeHeading:TCP.Client.Send,0,"PREP (REPLACE1)(REPLACE2)(REPLACE3)"
+
+////TCP Disconnection (Automatic Reboot)
+
+$PFAL,CNF.Set,AL81=TCP.Client.sDisconnected&SYS.TIMER.s4=inactive&Sys.nvCounter.s2=1:Sys.nvCounter2.Set=2&SYS.TIMER4.start=single,1800000
+$PFAL,CNF.Set,AL82=TCP.Client.sConnected&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&SYS.TIMER6.stop
+$PFAL,CNF.Set,AL83=SYS.TIMER.e4&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&Sys.device.reset,2
+$PFAL,CNF.Set,AL84
+
+/////////////Below Alarm lines are Asset dependant///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////Idling Handler
+
+$PFAL,CNF.Set,AL85=Sys.nvCounter.s0=2&GPS.Nav.sSpeed<1&GPS.Nav.sFix=valid&Sys.nvCounter.s4=1:Sys.nvCounter4.Set=2&Sys.MACRO3&GPS.Nav.Position2=current
+$PFAL,CNF.Set,AL86=Sys.nvCounter.s4=3&GPS.Nav.sSpeed>2&GPS.Nav.Position.s2>20:Sys.nvCounter4.Set=1&Sys.Timer8.Stop&GPS.Nav.Position2=none&TCP.Client.Send,0,"IDLE (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL87=Sys.nvCounter.s4=2&GPS.Nav.sSpeed<1&Sys.Timer.e8&Sys.nvCounter.s0=2:Sys.nvCounter4.Set=3&TCP.Client.Send,0,"IDLS (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL88=Sys.nvCounter.s0=1&Sys.nvCounter.s4=3:Sys.nvCounter4.Set=1&Sys.Timer8.Stop&GPS.Nav.Position2=none&TCP.Client.Send,0,"IDLE (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL89=Sys.nvCounter.s4=2&Sys.Timer.s8=inactive:Sys.MACRO3&GPS.Nav.Position2=current
+$PFAL,CNF.Set,AL90
+
+////OverSpeed Handler
+$PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>40&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s7<7:Sys.nvCounter7.Increment=1
+$PFAL,CNF.Set,AL92=Sys.nvCounter.s0=2&Sys.nvCounter.s7=7:Sys.nvCounter7.Set=8&TCP.Client.Send,0,"OSPS (REPLACE7)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL93=Sys.nvCounter.s0=2&GPS.Nav.sSpeed<38&Sys.nvCounter.s7=8:Sys.nvCounter7.Set=0&TCP.Client.Send,0,"OSPE (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL94
+
+////EcoDrive Handler (We are starting and stopping trip with Ignition logic)
+
+// Eco Drive settings
+//$PFAL,CNF.Set,ECODRIVE.AUTOSTART
+$PFAL,CNF.Set,ECODRIVE.CAR="NISSAN SUNNY",1058,P,170,72,3.3,188
+$PFAL,CNF.Set,ECODRIVE.TOPOLOGY=40,10,60,80,20
+$PFAL,CNF.Set,ECODRIVE.LIMITS=4,3,2,11,25
+
+//Journey Summary
+
+$PFAL,CNF.Set,AL95=Sys.Timer.e14:TCP.Client.Send,0,"JSUM &(IMEI),&(Time),&(Date),&(EcoTripResult),"
+$PFAL,CNF.Set,AL96=GPS.Nav.Position.s1>20&Sys.nvCounter.s0=2&GPS.Nav.sFix=correct:GPS.Nav.Position1=current&GPS.Nav.Distance.Save
+
+//Harsh Events
+$PFAL,CNF.Set,AL97=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s10=inactive&Ecodrive.eHarshTurn:Sys.Timer10.Start=Single,15000&TCP.Client.Send,0,"HARC (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL98=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s11=inactive&Ecodrive.eHarshBrake:Sys.Timer11.Start=Single,15000&TCP.Client.Send,0,"HARD (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL99=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s12=inactive&Ecodrive.eHarshAccelerate:Sys.Timer12.Start=Single,15000&TCP.Client.Send,0,"HARA (REPLACE1)(REPLACE2)(REPLACE3)"
+
+// -----------------------------------------------------------------------------------
+// OTHER SETTINGS:
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// OTHER SETTINGS:
+// -----------------------------------------------------------------------------------
+$PFAL,CNF.Set,DBG.EN=0
+$PFAL,CNF.Set,DEVICE.BAT.CHARGEMODE=eco
+$PFAL,CNF.Set,DEVICE.BAT.MODE=auto
+$PFAL,CNF.Set,DEVICE.CMD.PFAL.EN=F
+$PFAL,CNF.Set,DEVICE.COMM.CSD=cmd,60
+$PFAL,CNF.Set,DEVICE.COMM.TCP.CLIENT=cmd,60
+$PFAL,CNF.Set,DEVICE.GPS.AUTOCORRECT=on,4.0,50,50,8,10
+$PFAL,CNF.Set,DEVICE.GPS.CFG=5,fast,1,0,0
+$PFAL,CNF.Set,DEVICE.GPS.TIMEOUT=1,7
+$PFAL,CNF.Set,GPRS.AUTOSTART=1
+$PFAL,CNF.Set,GPRS.DIAL=ATD*99***1#
+$PFAL,CNF.Set,GPRS.QOS=0,0,0,0,0
+$PFAL,CNF.Set,GPRS.QOSMIN=0,0,0,0,0
+$PFAL,CNF.Set,GSM.BALANCE.DIAL=*100#
+$PFAL,CNF.Set,GSM.BANDPREF=EUR
+$PFAL,CNF.Set,GSM.CALLID.EN=1
+$PFAL,CNF.Set,GSM.OPERATOR.GPRSCHECK=disabled
+$PFAL,CNF.Set,GSM.PIN=0000
+$PFAL,CNF.Set,GSM.SMS.RESPONSE=1,5
+$PFAL,CNF.Set,MOTION.FILTER=4,20,390,156
+$PFAL,CNF.Set,PPP.AUTH=auto
+$PFAL,CNF.Set,PPP.AUTOPING=0,300000
+$PFAL,CNF.Set,PPP.PASSWORD=none
+$PFAL,CNF.Set,PPP.USERNAME=none
+$PFAL,CNF.Set,PROT.3DP=0
+$PFAL,CNF.Set,PROT.AREA=0
+$PFAL,CNF.Set,PROT.BIN=0
+$PFAL,CNF.Set,PROT.GGA=0
+$PFAL,CNF.Set,PROT.GLL=0
+$PFAL,CNF.Set,PROT.GSA=0
+$PFAL,CNF.Set,PROT.GSM=0
+$PFAL,CNF.Set,PROT.GSV=0
+$PFAL,CNF.Set,PROT.IOP=0
+$PFAL,CNF.Set,PROT.RMC=0
+$PFAL,CNF.Set,PROT.START.BIN=$
+$PFAL,CNF.Set,PROT.VTG=0
+$PFAL,CNF.Set,TCP.CLIENT.ALTERNATIVE=0,0.0.0.0,0
+$PFAL,CNF.Set,TCP.CLIENT.DNS.TIMEOUT=86400
+$PFAL,CNF.Set,TCP.CLIENT.LOGIN=1
+$PFAL,CNF.Set,TCP.CLIENT.SENDMODE=2
+$PFAL,CNF.Set,TCP.SERVICE.CONNECT=0,0.0.0.0,0
+$PFAL,CNF.Set,TCP.SMTP.CONNECT=0,<mailserver_ip>,<port>
+$PFAL,CNF.Set,TCP.SMTP.FROM=<valid mailadress>
+$PFAL,CNF.Set,TCP.SMTP.LOGIN="<domain>",180,"<username>","<password>"
+$PFAL,CNF.Set,TCP.STORAGE=size=3072,dispatch=manual
+$PFAL,CNF.Set,UDP.CLIENT.CONNECT=0,0.0.0.0,0
+$PFAL,CNF.Set,UDP.CLIENT.TIMEOUT=300000
+$PFAL,CNF.Set,DEVICE.SERIAL1.BAUDRATE=115200
+
+// GPRS.TIMEOUT(8min) > TCP.CLIENT.TIMEOUT(4min)
+// Ping (2min), OPlost (20min), Sleep retry (10min)
+$PFAL,CNF.Set,GPRS.TIMEOUT=1,480000
+$PFAL,CNF.Set,TCP.CLIENT.TIMEOUT=240000,30000
+$PFAL,CNF.Set,TCP.SERVICE.TIMEOUT=240000,30000
+$PFAL,CNF.Set,TCP.CLIENT.PING=1,120000
+$PFAL,CNF.Set,GSM.OPLOST.RESTART=1,1200000,8
+
+//Geofences
+$PFAL,CNF.Set,GF.AREA4="Dubai Saliks"
+$PFAL,CNF.Set,GF0=area1,"park position",C,25.1491649,55.4899579,77,800
+$PFAL,CNF.Set,GF1=area10,"Safa Gate",C2,25.19422,55.26255,200
+$PFAL,CNF.Set,GF2=area10,"Barsha",C2,25.11655,55.19266,150
+$PFAL,CNF.Set,GF3=area10,"Al Garhoud",C2,25.23133,55.33600,100
+$PFAL,CNF.Set,GF4=area10,"AL Maktoum",C2,25.25277,55.32188,100
+$PFAL,CNF.Set,GF5=area10,"AL Mamzar South",R,25.28625,55.35884,25.28733,55.35966
+$PFAL,CNF.Set,GF6=area10,"Airport Tunnel",R,25.24887,55.38686,25.24967,55.38740
+$PFAL,CNF.Set,GF7=area10,"AL Mamzar North",R,25.29289,55.36003,25.29465,55.36114
+
+//Alarm hide
+$PFAL,Sys.Security.HideAlarm," R0O4A3M9W0O0R2K7S0"
+
+//RFID Config
+$PFAL,CNF.Set,DEVICE.COMM.BINEVENT=,0D,e
+
+//Reboot to enable asset features
+$PFAL,Sys.Device.Reset,0

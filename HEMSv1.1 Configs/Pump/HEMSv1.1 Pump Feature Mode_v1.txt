@@ -1,0 +1,28 @@
+////////////////////////Geofence Enable/Disable
+//$PFAL,Sys.nvCounter1.Set=1
+////////////////////////Sleep Mode Enable/Disable
+//$PFAL,Sys.nvCounter10.Set=1
+///////////////////////Towing Enable
+//$PFAL,Sys.nvCounter6.Set=0
+////Towing Disable
+//$PFAL,Sys.nvCounter6.Set=9
+///////////////////////Starvation Enable/Disable
+//$PFAL,Sys.nvCounter12.Set=1
+///////////////////////Fault Detection Enable/Disable
+//$PFAL,Sys.nvCounter3.Set=1
+////////////////////////Power Status Enable
+//$PFAL,Sys.nvCounter8.Set=0
+////Power Status Disable
+//$PFAL,Sys.nvCounter8.Set=9
+////////////////////////TCP Disconnection Reboot
+//$PFAL,Sys.nvCounter2.Set=1
+////////////////////////RPM Dependency for Ignition Detection (1:RPM not Dependant,0: RPM Dependant)
+//$PFAL,Sys.nvCounter12.Set=0
+////////////////////////Ignition Enable/Disable
+//$PFAL,Sys.nvCounter0.Set=1
+
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter6.Set=0&Sys.nvCounter12.Set=0&Sys.nvCounter3.Set=1
+$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter8.Set=0&Sys.nvCounter2.Set=1&Sys.nvCounter11.Set=1&Sys.nvCounter0.Set=1
+
+////////////////////////Backup
+$PFAL,CNF.Backup
