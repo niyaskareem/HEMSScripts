@@ -116,8 +116,8 @@ $PFAL,Sys.CAN.Var.Add,2,Number,State,ext,00FEE900,4,0,7,7,LSB,0,1,2,0
 $PFAL,Sys.Can.Msg.Add,ext,00FECA00,00FFFF00
 //Bits 5-7 of byte 4 is also part of the SPN
 //$PFAL,Sys.CAN.Var.Add,13,Number,event,ext,00FECA00,2,0,4,7,LSB,0,1,1,0
-$PFAL,Sys.CAN.Var.Add,4,Number,state,ext,00FECA00,2,0,3,7,LSB,0,1,1,0
-$PFAL,Sys.CAN.Var.Add,5,Number,state,ext,00FECA00,4,0,4,4,LSB,0,1,1,0
+$PFAL,Sys.CAN.Var.Add,4,Number,event,ext,00FECA00,2,0,3,7,LSB,0,1,1,0
+$PFAL,Sys.CAN.Var.Add,5,Number,event,ext,00FECA00,4,0,4,4,LSB,0,1,1,0
 
 
 //CanMsg7 = ECU 2
