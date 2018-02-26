@@ -10,8 +10,15 @@
 //133ECF5								:	Resolved an issue where Multiple tagin before tagout results in a fake tag in and added tagout timer with every tap of the card
 //										:	Resolved a minor issue where boot reason in power up message was mapped wrong in the message format
 //133ECF6 								:	Added tagout in case if the asset is in different mode
+//133ED01								:	Changed Powerloss logic to detect powerloss even if it is a power disconnect
+//										:	Added time inactive filter on IDLS
+//										:	Increased IDLE distance from 20m to 50m
+//										:	Added motion based Idling in case of GPS failure
+//										:	Added GPS validity to Geofence events
+//										:	Added sleep mode end event
+//										:	Removed Geofences
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Vehicle_133ECF6
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Vehicle_133ED01
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -47,11 +54,11 @@ $PFAL,CNF.Set,GPRS.APN=m2m
 $PFAL,CNF.Set,REPLACE0=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),,&(Power),&(Vaccu),,,,&(nvCounter0),&(DOP),&(SatsUsed)
 
 // Message format for Analog/Canbus Assets
-$PFAL,Cnf.Set,REPLACE1=35 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),&(NavDist),&(Alt),&(Power),&(Bat),&(nvCounter0),&(Out0),&(DOP),&(SatsUsed),
-$PFAL,Cnf.Set,REPLACE2=&(IN2),
+$PFAL,Cnf.Set,REPLACE1=35 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),&(NavDist),&(Alt),&(Power),&(Bat),&(nvCounter0),&(Out0),&(DOP),&(SatsUsed)
+$PFAL,Cnf.Set,REPLACE2=,&(IN2),
 $PFAL,Cnf.Set,REPLACE3=&(ANA1)
 
-//Message format for HEA,
+//Message format for HEA
 $PFAL,Cnf.Set,REPLACE4=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),,&(Power),&(Bat),,,,&(nvCounter0),&(DOP),&(SatsUsed)
 
 //Message format for TAGI
@@ -85,7 +92,7 @@ $PFAL,CNF.Set,AL12=Sys.Device.eStart=Reset,USER0:Sys.Counter0.set=8&(REPLACE9)
 $PFAL,CNF.Set,AL13=Sys.Timer.e1&Sys.Power.sVoltage<9&Sys.nvCounter.s8<7:Sys.nvCounter8.Increment=1
 $PFAL,CNF.Set,AL14=Sys.Power.sVoltage<9&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRL (REPLACE0)"
 $PFAL,CNF.Set,AL15=Sys.Power.sVoltage>10&Sys.nvCounter.s8=8:Sys.nvCounter8.Set=0&TCP.Client.Send,0,"PWRR (REPLACE0)"
-$PFAL,CNF.Set,AL16=Sys.Power.sVoltage<1&Sys.nvCounter.s8>=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRD (REPLACE0)"
+$PFAL,CNF.Set,AL16
 
 ////Ignition on/off Handler
 //Ignition Detection Logic (Driver has to turn the key all the way off for Ignition Off-Refer Document)
@@ -136,7 +143,7 @@ $PFAL,CNF.Set,AL45=Sys.Counter.s3=1&Sys.nvCounter.s3=12&Sys.Timer.s7=inactive:Sy
 $PFAL,CNF.Set,AL46=Sys.nvCounter.s3=13:IO4.Set=Low&Sys.nvCounter3.Set=1&TCP.Client.Send,0,"NORM (REPLACE1)(REPLACE2)(REPLACE3)"
 
 ////Geofence Handler
-$PFAL,CNF.Set,AL48=GPS.Geofence.eX=inside&Sys.nvCounter.s1=1:Sys.nvCounter1.Set=2&TCP.Client.Send,0,"GEOIN (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL48=GPS.Geofence.eX=inside&GPS.Nav.sFix=valid&Sys.nvCounter.s1=1:Sys.nvCounter1.Set=2&TCP.Client.Send,0,"GEOIN (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL49=GPS.Geofence.eX=outside&Sys.nvCounter.s1=2:Sys.nvCounter1.Set=1&TCP.Client.Send,0,"GEOEX (REPLACE1)(REPLACE2)(REPLACE3)"
 
 ////Poll Handler
@@ -182,7 +189,7 @@ $PFAL,CNF.Set,AL67=Sys.Trigger.s5=high&Sys.nvCounter.s0=1:Sys.Device.Reset,1
 $PFAL,CNF.Set,AL68=Sys.Device.eStart=Wakeup,Ign?Sys.Device.eStart=Wakeup,Timer?Sys.Device.eStart=Wakeup,Ring:Sys.Timer15.Start=Single,10000
 ////Sleep Mode Handler
 $PFAL,CNF.Set,AL69=Sys.Timer.e5&Sys.nvCounter.s10=1:Sys.Device.Sleep=Ign+Ring+ExtPwrDrop+Timer=12:00:00&TCP.Client.Send,0,"Sleep Mode Started &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix)"
-$PFAL,CNF.Set,AL70=Sys.Device.eStart=Wakeup,Timer:Sys.Timer5.Start=Single,300000
+$PFAL,CNF.Set,AL70=Sys.Device.eStart=Wakeup,Timer:Sys.Timer5.Start=Single,300000&TCP.Client.Send,0,"Sleep Mode Ended &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix)"
 //Invalid Sleep safety
 $PFAL,CNF.Set,AL71=Sys.nvCounter.s0=2&Sys.Timer.s5=running:Sys.Timer5.Stop
 ////Towing Handler
@@ -192,10 +199,9 @@ $PFAL,CNF.Set,AL74=Sys.nvCounter.s6=7&Sys.nvCounter.s0=1:Sys.nvCounter6.Set=8&Sy
 $PFAL,CNF.Set,AL75=Sys.nvCounter.s6=8&GPS.Nav.sSpeed<1:Sys.nvCounter6.Set=0&Sys.Timer9.Stop&Sys.MACRO2
 $PFAL,CNF.Set,AL76=Sys.nvCounter.s6=8&Sys.nvCounter.s0=2:Sys.nvCounter6.Set=0&Sys.Timer9.Stop
 $PFAL,CNF.Set,AL77=Sys.Timer.e9&Sys.nvCounter.s6=8:TCP.Client.Send,0,"TOWP (REPLACE1)(REPLACE2)(REPLACE3)"
-////Position Report
 
+////Position Report
 $PFAL,GPS.Nav.SetHeadingTolerance=90
-$PFAL,CNF.Set,AL79
 $PFAL,CNF.Set,AL80=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&GPS.Nav.eChangeHeading:TCP.Client.Send,0,"PREP (REPLACE1)(REPLACE2)(REPLACE3)"
 
 ////TCP Disconnection (Automatic Reboot)
@@ -203,23 +209,24 @@ $PFAL,CNF.Set,AL80=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&GPS.Nav.eChangeHeading:
 $PFAL,CNF.Set,AL81=TCP.Client.sDisconnected&SYS.TIMER.s4=inactive&Sys.nvCounter.s2=1:Sys.nvCounter2.Set=2&SYS.TIMER4.start=single,1800000
 $PFAL,CNF.Set,AL82=TCP.Client.sConnected&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&SYS.TIMER6.stop
 $PFAL,CNF.Set,AL83=SYS.TIMER.e4&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&Sys.device.reset,2
-$PFAL,CNF.Set,AL84
+
 
 /////////////Below Alarm lines are Asset dependant///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////Idling Handler
 
-$PFAL,CNF.Set,AL85=Sys.nvCounter.s0=2&GPS.Nav.sSpeed<1&GPS.Nav.sFix=valid&Sys.nvCounter.s4=1:Sys.nvCounter4.Set=2&Sys.MACRO3&GPS.Nav.Position2=current
-$PFAL,CNF.Set,AL86=Sys.nvCounter.s4=3&GPS.Nav.sSpeed>2&GPS.Nav.Position.s2>20:Sys.nvCounter4.Set=1&Sys.Timer8.Stop&GPS.Nav.Position2=none&TCP.Client.Send,0,"IDLE (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL85=Sys.nvCounter.s0=2&GPS.Nav.sSpeed<1&GPS.Nav.sFix=valid&Sys.nvCounter.s4=1&Sys.Timer.s8=inactive:Sys.nvCounter4.Set=2&Sys.MACRO3&GPS.Nav.Position2=current
+$PFAL,CNF.Set,AL86=Sys.nvCounter.s4=3&GPS.Nav.sSpeed>2&GPS.Nav.Position.s2>50&GPS.Nav.sFix=valid:Sys.nvCounter4.Set=1&Sys.Timer8.Stop&GPS.Nav.Position2=none&TCP.Client.Send,0,"IDLE (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL87=Sys.nvCounter.s4=2&GPS.Nav.sSpeed<1&Sys.Timer.e8&Sys.nvCounter.s0=2:Sys.nvCounter4.Set=3&TCP.Client.Send,0,"IDLS (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL88=Sys.nvCounter.s0=1&Sys.nvCounter.s4=3:Sys.nvCounter4.Set=1&Sys.Timer8.Stop&GPS.Nav.Position2=none&TCP.Client.Send,0,"IDLE (REPLACE1)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL89=Sys.nvCounter.s4=2&Sys.Timer.s8=inactive:Sys.MACRO3&GPS.Nav.Position2=current
-$PFAL,CNF.Set,AL90
+$PFAL,CNF.Set,AL89=Sys.nvCounter.s4=2&GPS.Nav.sFix=valid&Sys.Timer.s8=inactive:Sys.MACRO3&GPS.Nav.Position2=current
+$PFAL,CNF.Set,AL90=Sys.nvCounter.s0=2&GPS.Nav.sFix=invalid&Sys.nvCounter.s4=3&IO.Motion.sMoving&Sys.Counter.s1<45:Sys.Counter1.Increment=1
+$PFAL,CNF.Set,AL94=Sys.Counter.s1=45:Sys.Counter1.Set=0&Sys.nvCounter4.Set=1&Sys.Timer8.Stop&GPS.Nav.Position2=none&TCP.Client.Send,0,"IDLE (REPLACE1)(REPLACE2)(REPLACE3)"
 
 ////OverSpeed Handler
 $PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>40&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s7<7:Sys.nvCounter7.Increment=1
 $PFAL,CNF.Set,AL92=Sys.nvCounter.s0=2&Sys.nvCounter.s7=7:Sys.nvCounter7.Set=8&TCP.Client.Send,0,"OSPS (REPLACE7)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL93=Sys.nvCounter.s0=2&GPS.Nav.sSpeed<38&Sys.nvCounter.s7=8:Sys.nvCounter7.Set=0&TCP.Client.Send,0,"OSPE (REPLACE1)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL94
+
 
 ////EcoDrive Handler (We are starting and stopping trip with Ignition logic)
 
@@ -303,15 +310,6 @@ $PFAL,CNF.Set,TCP.CLIENT.PING=1,120000
 $PFAL,CNF.Set,GSM.OPLOST.RESTART=1,1200000,8
 
 //Geofences
-$PFAL,CNF.Set,GF.AREA4="Dubai Saliks"
-$PFAL,CNF.Set,GF0=area1,"park position",C,25.1491649,55.4899579,77,800
-$PFAL,CNF.Set,GF1=area10,"Safa Gate",C2,25.19422,55.26255,200
-$PFAL,CNF.Set,GF2=area10,"Barsha",C2,25.11655,55.19266,150
-$PFAL,CNF.Set,GF3=area10,"Al Garhoud",C2,25.23133,55.33600,100
-$PFAL,CNF.Set,GF4=area10,"AL Maktoum",C2,25.25277,55.32188,100
-$PFAL,CNF.Set,GF5=area10,"AL Mamzar South",R,25.28625,55.35884,25.28733,55.35966
-$PFAL,CNF.Set,GF6=area10,"Airport Tunnel",R,25.24887,55.38686,25.24967,55.38740
-$PFAL,CNF.Set,GF7=area10,"AL Mamzar North",R,25.29289,55.36003,25.29465,55.36114
 
 //Alarm hide
 $PFAL,Sys.Security.HideAlarm," R0O4A3M9W0O0R2K7S0"

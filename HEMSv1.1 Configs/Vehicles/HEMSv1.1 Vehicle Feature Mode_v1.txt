@@ -38,6 +38,10 @@ $PFAL,CNF.Set,MACRO3=Sys.Timer8.Start=Single,900000
 $PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
 //Position report timer
 $PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,3600000
+
+///////////////Overspeed
+////OverSpeed Handler
+$PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>40&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s7<7:Sys.nvCounter7.Increment=1
 //Overspeed setting as per customer requirement needs to be set in m/s onto nvCounter 11
 $PFAL,CNF.Set,AL0=Sys.Counter.s0>=1&Sys.nvCounter.s11=0:Sys.nvCounter11.Set=34
 
