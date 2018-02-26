@@ -5,8 +5,13 @@
 //										:	Added Ignition filter when Journey periodic is sent to prevent false periodic message	
 //										:	Resolved a minor issue where there might not be a tagout if he tag in while keeping the ACC On without starting the vehicle
 //133ECF5 								:	Resolved a minor issue where boot reason in power up message was mapped wrong in the message format
+//133ED01								:	Changed Powerloss logic to detect powerloss even if it is a power disconnect
+//										:	Resolved an issue where Fault codes would not trigger if there are multiple faults and no faults reset
+//										:	Asset shutdown logic improved
+//										:	Added timer inactive filter to protect starter motor of the pump while remote starting the pump
+//										:	Removed Geofences
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Pump_133ECF5
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Pump_133ED01
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -42,9 +47,9 @@ $PFAL,CNF.Set,GPRS.APN=m2m
 $PFAL,CNF.Set,REPLACE0=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),,&(Power),&(Vaccu),,,,&(nvCounter0),&(DOP),&(SatsUsed)
 
 // Message format for Analog/Canbus Assets
-$PFAL,Cnf.Set,REPLACE1=30 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),&(NavDist),&(Alt),&(Power),&(Bat),&(nvCounter0,&(Out0),&(DOP),&(SatsUsed)
-$PFAL,Cnf.Set,REPLACE2=,&(CanMsg0),&(CanMsg1),&(CanMsg2),&(CAN0),&(CAN1),&(CAN2),&(CanMsg6),&(CAN3),&(CAN4),&(CAN5),&(CanMsg7)
-$PFAL,Cnf.Set,REPLACE3=,&(nvCounter16):&(nvCounter15),&(nvCounter14)
+$PFAL,Cnf.Set,REPLACE1=30 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),&(NavDist),&(Alt),&(Power),&(Bat),&(nvCounter0),&(Out0),&(DOP),&(SatsUsed)
+$PFAL,Cnf.Set,REPLACE2=,&(CanMsg0),&(CanMsg1),&(CanMsg2),&(CAN0),&(CAN1),&(CAN2),&(CanMsg6),&(CAN3),&(CAN4),&(CAN5)
+$PFAL,Cnf.Set,REPLACE3=,&(nvCounter16):&(nvCounter15),&(nvCounter14),&(CanMsg7)
 
 //Message format for HEA,
 $PFAL,Cnf.Set,REPLACE4=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),,&(Power),&(Bat),,,,&(nvCounter0),&(DOP),&(SatsUsed)
@@ -113,8 +118,8 @@ $PFAL,Sys.CAN.Var.Add,2,Number,State,ext,00FEE900,4,0,7,7,LSB,0,1,2,0
 $PFAL,Sys.Can.Msg.Add,ext,00FECA00,00FFFF00
 //Bits 5-7 of byte 4 is also part of the SPN
 //$PFAL,Sys.CAN.Var.Add,13,Number,event,ext,00FECA00,2,0,4,7,LSB,0,1,1,0
-$PFAL,Sys.CAN.Var.Add,4,Number,state,ext,00FECA00,2,0,3,7,LSB,0,1,1,0
-$PFAL,Sys.CAN.Var.Add,5,Number,state,ext,00FECA00,4,0,4,4,LSB,0,1,1,0
+$PFAL,Sys.CAN.Var.Add,4,Number,event,ext,00FECA00,2,0,4,7,LSB,0,1,1,0
+$PFAL,Sys.CAN.Var.Add,5,Number,State,ext,00FECA00,4,0,4,4,LSB,0,1,1,0
 
 //CanMsg7 = Dash Display
 $PFAL,Sys.Can.Msg.Add,ext,00FEFC00,00FFFF00
@@ -131,16 +136,16 @@ $PFAL,CNF.Set,AL5=Sys.Device.eStart=Wakeup,ExtPwrDrop:Sys.Counter0.set=5&(REPLAC
 $PFAL,CNF.Set,AL6=Sys.Device.eStart=Reset,GSM_CCE1:Sys.Counter0.set=6&(REPLACE9)
 $PFAL,CNF.Set,AL7=Sys.Device.eStart=Reset,Watchdog0?Sys.Device.eStart=Reset,Watchdog1?Sys.Device.eStart=Reset,Watchdog2?Sys.Device.eStart=Reset,Watchdog3?Sys.Device.eStart=Reset,Watchdog4:Sys.Counter0.set=7&(REPLACE9)
 $PFAL,CNF.Set,AL8=Sys.Device.eStart=Reset,Watchdog5?Sys.Device.eStart=Reset,Watchdog5?Sys.Device.eStart=Reset,Watchdog6:Sys.Counter0.set=7&(REPLACE9)
-$PFAL,CNF.Set,AL9=Sys.Counter.s0>=1&Sys.Timer.e2:TCP.Client.Send,0,"PWRUP (REPLACE6)"
+$PFAL,CNF.Set,AL9=Sys.Counter.s0>=1&Sys.Timer.e2:TCP.Client.Send,0,"PWRUP (REPLACE6)"&Sys.nvCounter2.Set=1
 
 //To retain the status in case unit reboot in between journey
 $PFAL,CNF.Set,AL10=Sys.Device.eStart&Sys.nvCounter.s0=2:Sys.MACRO1&Sys.Timer5.Stop&Sys.MACRO5&GPS.Nav.Distance.Load
 $PFAL,CNF.Set,AL12=Sys.Device.eStart=Reset,USER0:Sys.Counter0.set=8&(REPLACE9)
 ////Power status Handler
-$PFAL,CNF.Set,AL13=Sys.Power.sVoltage<9&Sys.nvCounter.s8<7:Sys.nvCounter8.Increment=1
-$PFAL,CNF.Set,AL14=Sys.Power.sVoltage>8&Sys.Power.sVoltage<9&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRL (REPLACE0)"
+$PFAL,CNF.Set,AL13=Sys.Timer.e1&Sys.Power.sVoltage<9&Sys.nvCounter.s8<7:Sys.nvCounter8.Increment=1
+$PFAL,CNF.Set,AL14=Sys.Power.sVoltage<9&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRL (REPLACE0)"
 $PFAL,CNF.Set,AL15=Sys.Power.sVoltage>10&Sys.nvCounter.s8=8:Sys.nvCounter8.Set=0&TCP.Client.Send,0,"PWRR (REPLACE0)"
-$PFAL,CNF.Set,AL16=Sys.Power.sVoltage<1&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRD (REPLACE0)"
+$PFAL,CNF.Set,AL16
 
 ////Ignition on/off Handler
 //Ignition Detection Logic (Driver has to turn the key all the way off for Ignition Off-Refer Document)
@@ -151,16 +156,16 @@ $PFAL,CNF.Set,AL19=Sys.nvCounter.s12=1&IO.s8=High&Sys.Trigger.s1=Low:Sys.Trigger
 $PFAL,CNF.Set,AL20=Sys.nvCounter.s12=1&IO.s8=Low&Sys.Trigger.s1=High:Sys.Trigger1=Low
 
 //Ignition ON/OFF Events
-$PFAL,CNF.Set,AL25=Sys.Trigger.s1=High&Sys.CAN.s3>=200&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
-$PFAL,CNF.Set,AL26=Sys.Trigger.s1=Low&Sys.CAN.s3<200&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
+$PFAL,CNF.Set,AL25=Sys.Timer.e1&Sys.Trigger.s1=High&Sys.CAN.s3>=200&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
+$PFAL,CNF.Set,AL26=Sys.Timer.e1&Sys.Trigger.s1=Low&Sys.CAN.s3<200&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
 $PFAL,CNF.Set,AL27=Sys.nvCounter.s5=8&Sys.nvCounter.s0=1:Sys.nvCounter0.set=2&Sys.MACRO1&Sys.Timer5.Stop&Sys.MACRO5&TCP.Client.Send,0,"IN8H (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL28=Sys.nvCounter.s5=8&Sys.nvCounter.s0=1:GPS.Nav.Distance.Load&Sys.Timer1.start=cyclic,1000
 $PFAL,CNF.Set,AL29=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:Sys.nvCounter0.set=1&Sys.Timer3.Stop&Sys.MACRO2&Sys.Timer13.stop&TCP.Client.Send,0,"IN8L (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL30=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:GPS.Nav.Distance.Save&Sys.Timer1.stop
 
 //For Assets without RPM
-$PFAL,CNF.Set,AL21=Sys.nvCounter.s12=1&Sys.Trigger.s1=High&IO.s8=High&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
-$PFAL,CNF.Set,AL31=Sys.nvCounter.s12=1&Sys.Trigger.s1=Low&IO.s8=Low&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
+$PFAL,CNF.Set,AL21=Sys.Timer.e1&Sys.nvCounter.s12=1&Sys.Trigger.s1=High&IO.s8=High&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
+$PFAL,CNF.Set,AL31=Sys.Timer.e1&Sys.nvCounter.s12=1&Sys.Trigger.s1=Low&IO.s8=Low&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
 
 ////Periodic Handler
 //AL32 for Analog Assets
@@ -169,8 +174,8 @@ $PFAL,CNF.Set,AL33=Sys.nvCounter.s0=2&Sys.Timer.e3:TCP.Client.Send,0,"CANP (REPL
 
 ////Geofence Handler
 
-$PFAL,CNF.Set,AL48=GPS.Geofence.eX=inside&Sys.nvCounter.s1=1:Sys.nvCounter1.Set=2&TCP.Client.Send,0,"GEOIN (REPLACE1)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL49=GPS.Geofence.eX=outside&Sys.nvCounter.s1=2:Sys.nvCounter1.Set=1&TCP.Client.Send,0,"GEOEX (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL48=GPS.Geofence.eX=inside&GPS.Nav.sFix=valid&Sys.nvCounter.s1=1:Sys.nvCounter1.Set=2&TCP.Client.Send,0,"GEOIN (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL49=GPS.Geofence.eX=outside&GPS.Nav.sFix=valid&Sys.nvCounter.s1=2:Sys.nvCounter1.Set=1&TCP.Client.Send,0,"GEOEX (REPLACE1)(REPLACE2)(REPLACE3)"
 
 ////Poll Handler
 //Poll response over GPRS
@@ -216,13 +221,13 @@ $PFAL,CNF.Set,AL67=Sys.Trigger.s5=high&Sys.nvCounter.s0=1:Sys.Device.Reset,1
 $PFAL,CNF.Set,AL68=Sys.Device.eStart=Wakeup,Ign?Sys.Device.eStart=Wakeup,Timer?Sys.Device.eStart=Wakeup,Ring:Sys.Timer15.Start=Single,180000
 ////Sleep Mode Handler
 $PFAL,CNF.Set,AL69=Sys.Timer.e5&Sys.nvCounter.s10=1:Sys.Device.Sleep=Ign+Ring+ExtPwrDrop+Timer=12:00:00&TCP.Client.Send,0,"Sleep Mode Started &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix)"
-$PFAL,CNF.Set,AL70=Sys.Device.eStart=Wakeup,Timer:Sys.Timer5.Start=Single,300000
+$PFAL,CNF.Set,AL70=Sys.Device.eStart=Wakeup,Timer:Sys.Timer5.Start=Single,300000&TCP.Client.Send,0,"Sleep Mode Ended &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix)"
 //Invalid Sleep safety
 $PFAL,CNF.Set,AL71=Sys.nvCounter.s0=2&Sys.Timer.s5=running:Sys.Timer5.Stop
 
 ////Towing Handler
 
-$PFAL,CNF.Set,AL73=Sys.nvCounter.s0=1&GPS.Nav.sSpeed>6&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s6<7:Sys.nvCounter6.Increment=1
+$PFAL,CNF.Set,AL73=Sys.nvCounter.s0=1&GPS.Nav.sSpeed>6&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s6<8:Sys.nvCounter6.Increment=1
 $PFAL,CNF.Set,AL74=Sys.nvCounter.s6=7&Sys.nvCounter.s0=1:Sys.nvCounter6.Set=8&Sys.MACRO4&Sys.Timer5.Stop&TCP.Client.Send,0,"TOW (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL75=Sys.nvCounter.s6=8&GPS.Nav.sSpeed<1:Sys.nvCounter6.Set=0&Sys.Timer9.Stop&Sys.MACRO2
 $PFAL,CNF.Set,AL76=Sys.nvCounter.s6=8&Sys.nvCounter.s0=2:Sys.nvCounter6.Set=0&Sys.Timer9.Stop
@@ -241,25 +246,24 @@ $PFAL,CNF.Set,AL83=SYS.TIMER.e4&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&Sys.devi
 //Remote start and stop Handler (requires IOBOX)
 
 //Remote Start and Stop
-$PFAL,CNF.Set,AL34=Sys.Counter.s3=1:Sys.Counter3.Clear&IO16.Set=High&SYS.TIMER0.start=single,4000&SYS.TIMER10.start=single,5000&TCP.Client.Send,0,"RESTA (REPLACE3)"
+$PFAL,CNF.Set,AL34=Sys.Counter.s3=1&Sys.Timer.s0=inactive:Sys.Counter3.Clear&IO16.Set=High&SYS.TIMER0.start=single,4000&SYS.TIMER10.start=single,5000&TCP.Client.Send,0,"RESTA (REPLACE3)"
 $PFAL,CNF.Set,AL35=SYS.TIMER.e0:IO16.Set=low
-$PFAL,CNF.Set,AL36=Sys.Counter.s7=1:Sys.Counter7.Clear&IO17.Set=High&SYS.TIMER11.start=single,5000&TCP.Client.Send,0,"RESTO (REPLACE3)"
+$PFAL,CNF.Set,AL36=Sys.Counter.s7=1&Sys.Timer.s11=inactive:Sys.Counter7.Clear&IO17.Set=High&SYS.TIMER11.start=single,5000&TCP.Client.Send,0,"RESTO (REPLACE3)"
 $PFAL,CNF.Set,AL37=SYS.TIMER.e11:IO17.Set=low
 //Additional Safety to TURN OFF the Starter Relay on IGN detection
 $PFAL,CNF.Set,AL38=SYS.TIMER.e10?IO.e8=redge:IO19.Set=high
 
 //Fault Detection
-$PFAL,CNF.Set,AL39=Sys.Can.e4&Sys.CAN.s4>0&Sys.nvCounter.s3=1:Sys.nvCounter3.Set=2&TCP.Client.Send,0,"Fault Detected &(IMEI),&(CanMsg6),&(CAN4),&(CAN5)"
+$PFAL,CNF.Set,AL39=Sys.Can.e4&Sys.CAN.s4>0:Sys.nvCounter3.Set=2&TCP.Client.Send,0,"Fault Detected &(IMEI),&(CanMsg6),&(CAN4),&(CAN5)"
 $PFAL,CNF.Set,AL40=Sys.Can.e4&Sys.CAN.s4=0&Sys.nvCounter.s3=2:Sys.nvCounter3.Set=1&TCP.Client.Send,0,"Fault Reset &(IMEI),&(CanMsg6),&(CAN4),&(CAN5)"
 
-
-//Asset Shutdown Alert (FMI Based)
-$PFAL,CNF.Set,AL42=Sys.CAN.s5=0?Sys.CAN.s5=1:Sys.Trigger0=High
-$PFAL,CNF.Set,AL43=Sys.CAN.s5>1:Sys.Trigger0=Low
-$PFAL,CNF.Set,AL44=Sys.nvCounter.s3=2&Sys.Trigger.s0=High:Sys.Trigger0=Low&TCP.Client.Send,0,"Shutdown Alert &(IMEI),&(CanMsg6),&(CAN5)"
+//Asset Shutdown Alert (FMI Based-Beta version)
+$PFAL,CNF.Set,AL41=Sys.CAN.e5&Sys.CAN.s5=0:Sys.Trigger0=High
+$PFAL,CNF.Set,AL42=Sys.CAN.e5&Sys.CAN.s5=1:Sys.Trigger0=High
+$PFAL,CNF.Set,AL43=Sys.CAN.e5&Sys.CAN.s5>1:Sys.Trigger0=Low
+$PFAL,CNF.Set,AL44=Sys.Trigger.s0=High&Sys.CAN.s4>0:Sys.Trigger0=Low&TCP.Client.Send,0,"Shutdown Alert &(IMEI),&(CanMsg6),&(CAN5)"
 
 //Starvation Handler
-
 $PFAL,CNF.Set,AL85=IO.e0=fedge&Sys.nvCounter.s0=2&Sys.nvCounter.s11=1&Sys.Timer.s12=inactive:Sys.nvCounter11.Set=2&Sys.Timer8.Start=Single,120000
 $PFAL,CNF.Set,AL86=Sys.Timer.e8&IO.s0=Low&Sys.nvCounter.s0=2&Sys.nvCounter.s11=2:Sys.nvCounter11.Set=3&TCP.Client.Send,0,"STARVS (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL87=Sys.nvCounter.s11=3&IO.e0=redge&Sys.nvCounter.s0=2&Sys.Timer.s8=inactive:Sys.nvCounter11.Set=4&Sys.Timer12.Start=Single,120000
@@ -278,7 +282,6 @@ $PFAL,CNF.Set,AL11
 $PFAL,CNF.Set,AL23
 $PFAL,CNF.Set,AL24
 $PFAL,CNF.Set,AL32
-$PFAL,CNF.Set,AL41
 $PFAL,CNF.Set,AL46
 $PFAL,CNF.Set,AL47
 $PFAL,CNF.Set,AL79
@@ -355,15 +358,6 @@ $PFAL,CNF.Set,TCP.CLIENT.PING=1,120000
 $PFAL,CNF.Set,GSM.OPLOST.RESTART=1,1200000,8
 
 //Geofences
-$PFAL,CNF.Set,GF.AREA4="Dubai Saliks"
-$PFAL,CNF.Set,GF0=area1,"park position",C,25.1491649,55.4899579,77,800
-$PFAL,CNF.Set,GF1=area10,"Safa Gate",C2,25.19422,55.26255,200
-$PFAL,CNF.Set,GF2=area10,"Barsha",C2,25.11655,55.19266,150
-$PFAL,CNF.Set,GF3=area10,"Al Garhoud",C2,25.23133,55.33600,100
-$PFAL,CNF.Set,GF4=area10,"AL Maktoum",C2,25.25277,55.32188,100
-$PFAL,CNF.Set,GF5=area10,"AL Mamzar South",R,25.28625,55.35884,25.28733,55.35966
-$PFAL,CNF.Set,GF6=area10,"Airport Tunnel",R,25.24887,55.38686,25.24967,55.38740
-$PFAL,CNF.Set,GF7=area10,"AL Mamzar North",R,25.29289,55.36003,25.29465,55.36114
 
 //Alarm hide
 $PFAL,Sys.Security.HideAlarm," R0O4A3M9W0O0R2K7S0"
