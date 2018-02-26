@@ -158,16 +158,16 @@ $PFAL,CNF.Set,AL19=Sys.nvCounter.s12=1&IO.s8=High&Sys.Trigger.s1=Low:Sys.Trigger
 $PFAL,CNF.Set,AL20=Sys.nvCounter.s12=1&IO.s8=Low&Sys.Trigger.s1=High:Sys.Trigger1=Low
 
 //Ignition ON/OFF Events
-$PFAL,CNF.Set,AL25=Sys.Trigger.s1=High&Sys.CAN.s1>=200&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
-$PFAL,CNF.Set,AL26=Sys.Trigger.s1=Low&Sys.CAN.s1<200&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
+$PFAL,CNF.Set,AL25=Sys.Timer.e1&Sys.Trigger.s1=High&Sys.CAN.s1>=200&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
+$PFAL,CNF.Set,AL26=Sys.Timer.e1&Sys.Trigger.s1=Low&Sys.CAN.s1<200&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
 $PFAL,CNF.Set,AL27=Sys.nvCounter.s5=8&Sys.nvCounter.s0=1:Sys.nvCounter0.set=2&Sys.MACRO1&Sys.Timer5.Stop&Sys.MACRO5&TCP.Client.Send,0,"IN8H (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL28=Sys.nvCounter.s5=8&Sys.nvCounter.s0=1:GPS.Nav.Distance.Load&GPS.Nav.Position1=current&Sys.Timer1.Start=Cyclic,1000
 $PFAL,CNF.Set,AL29=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:Sys.nvCounter0.set=1&Sys.Timer3.Stop&Sys.MACRO2&Sys.Timer13.stop&TCP.Client.Send,0,"IN8L (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL30=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:GPS.Nav.Distance.Save&Sys.Timer1.stop
 
 //For analog Generators without RPM
-$PFAL,CNF.Set,AL21=Sys.nvCounter.s12=1&Sys.Trigger.s1=High&IO.s8=High&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
-$PFAL,CNF.Set,AL31=Sys.nvCounter.s12=1&Sys.Trigger.s1=Low&IO.s8=Low&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
+$PFAL,CNF.Set,AL21=Sys.Timer.e1&Sys.nvCounter.s12=1&Sys.Trigger.s1=High&IO.s8=High&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
+$PFAL,CNF.Set,AL31=Sys.Timer.e1&Sys.nvCounter.s12=1&Sys.Trigger.s1=Low&IO.s8=Low&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
 
 ////Periodic Handler
 //AL32 for Analog Assets

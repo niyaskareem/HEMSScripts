@@ -106,8 +106,8 @@ $PFAL,CNF.Set,AL29=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:Sys.nvCounter0.set=1&S
 $PFAL,CNF.Set,AL30=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:GPS.Nav.Distance.Save&Sys.Timer7.Start=Single,25000
 
 //For analog Assets without RPM
-$PFAL,CNF.Set,AL21=Sys.Trigger.s1=High&IO.s8=High&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
-$PFAL,CNF.Set,AL31=Sys.Trigger.s1=Low&IO.s8=Low&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
+$PFAL,CNF.Set,AL21=Sys.Timer.e1&Sys.Trigger.s1=High&IO.s8=High&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
+$PFAL,CNF.Set,AL31=Sys.Timer.e1&Sys.Trigger.s1=Low&IO.s8=Low&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
 
 ////Periodic Handler
 //AL32 for Analog Assets
