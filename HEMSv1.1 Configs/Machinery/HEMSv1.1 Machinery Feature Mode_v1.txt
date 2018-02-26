@@ -25,10 +25,30 @@
 ////Ignition Enable/Disable
 //$PFAL,Sys.nvCounter0.Set=1
 
+////////////Customer Specific
 
-//Change the overspeed value in m/s to NVCOUNTER11 in the below command
+//MACROS
+//Power up timer
+$PFAL,CNF.Set,MACRO0=Sys.Timer2.Start=Single,180000
+//Periodic timer (Journey/CAN)
+$PFAL,CNF.Set,MACRO1=Sys.Timer3.Start=Cyclic,300000
+//Sleep timer
+$PFAL,CNF.Set,MACRO2=Sys.Timer5.Start=Single,14400000
+//Idling timer
+$PFAL,CNF.Set,MACRO3=Sys.Timer8.Start=Single,900000
+//Towing periodic
+$PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
+//CAN Request timer
+$PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,300000
+
+///////////////Overspeed
+////OverSpeed Handler
+$PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>40&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s7<7:Sys.nvCounter7.Increment=1
+//Overspeed setting as per customer requirement needs to be set in m/s onto nvCounter 11
+$PFAL,CNF.Set,AL0=Sys.Counter.s0>=1&Sys.nvCounter.s11=0:Sys.nvCounter11.Set=34
+
 //Feature enabler
-$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter3.Set=1&Sys.nvCounter4.Set=1&Sys.nvCounter6.Set=0&Sys.nvCounter11.Set=34
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter3.Set=1&Sys.nvCounter4.Set=1&Sys.nvCounter6.Set=0
 $PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter7.Set=1&Sys.nvCounter8.Set=1&Sys.nvCounter12.Set=0&Sys.nvCounter13.Set=1&Sys.nvCounter0.Set=1
 
 //Baudrate change for RFID
