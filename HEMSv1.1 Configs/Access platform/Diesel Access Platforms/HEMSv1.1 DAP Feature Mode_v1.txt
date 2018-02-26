@@ -21,8 +21,23 @@
 ////////////////////////Ignition Enable/Disable
 //$PFAL,Sys.nvCounter0.Set=1
 
+/////////////////Customer specific
+//MACROS
+//Power up timer
+$PFAL,CNF.Set,MACRO0=Sys.Timer2.Start=Single,180000
+//Periodic timer (Journey/CAN)
+$PFAL,CNF.Set,MACRO1=Sys.Timer3.Start=Cyclic,300000
+//Sleep timer
+$PFAL,CNF.Set,MACRO2=Sys.Timer5.Start=Single,14400000
+//Idling timer
+//$PFAL,CNF.Set,MACRO3=Sys.Timer8.Start=Single,900000
+//Towing periodic
+$PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
+//5 Minutes timer for CAN request
+$PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,300000
+
 $PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter6.Set=0&Sys.nvCounter12.Set=0&Sys.nvCounter3.Set=1
-$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter8.Set=0&Sys.nvCounter2.Set=1&Sys.nvCounter11.Set=0&Sys.nvCounter0.Set=1
+$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter8.Set=0&Sys.nvCounter0.Set=1
 
 //Baudrate change for RFID
 $PFAL,CNF.Set,DEVICE.SERIAL0.BAUDRATE=38400

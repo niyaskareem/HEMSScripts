@@ -8,8 +8,13 @@
 //133ECF5								:	Resolved an issue where Multiple tagin before tagout results in a fake tag in and added tagout timer with every tap of the card
 //										:	Resolved a minor issue where boot reason in power up message was mapped wrong in the message format
 //133ECF6 								:	Added tagout in case if the asset is in different mode
+//133ED01								:	Changed Powerloss logic
+//										:	Resolved an issue where Fault codes would not trigger if there are multiple faults and no faults reset
+//										:	Asset shutdown logic improved
+//										:	Removed Power disconnect event
+//										:	Removed Geofences
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-DAP_133ECF6
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-DAP_133ED01
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -47,7 +52,7 @@ $PFAL,CNF.Set,REPLACE0=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),
 // Message format for Analog/Canbus Assets
 $PFAL,Cnf.Set,REPLACE1=31 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),&(NavDist),&(Alt),&(Power),&(Bat),&(nvCounter0),&(Out0),&(DOP),&(SatsUsed)
 $PFAL,Cnf.Set,REPLACE2=,&(CanMsg0),&(CanMsg1),&(CanMsg2),&(CAN0),&(CAN1),&(CAN2),&(CanMsg6),&(CAN3),&(CAN4),&(CAN5),&(CAN6)
-$PFAL,Cnf.Set,REPLACE3=,&(nvCounter16):&(nvCounter15),&(nvCounter14)
+$PFAL,Cnf.Set,REPLACE3=,&(nvCounter16):&(nvCounter15),&(nvCounter14),&(CanMsg8)
 
 //Message format for HEA,
 $PFAL,Cnf.Set,REPLACE4=0 &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix),&(Course),&(Speed),,&(Power),&(Bat),,,,&(nvCounter0),&(DOP),&(SatsUsed)
@@ -147,10 +152,10 @@ $PFAL,CNF.Set,AL10=Sys.Device.eStart&Sys.nvCounter.s0=2:Sys.MACRO1&Sys.Timer5.St
 $PFAL,CNF.Set,AL11=Sys.Device.eStart&Sys.nvCounter.s0=1&Sys.nvCounter.s3=2:Sys.Timer7.Start=Single,5000&Sys.Timer6.Start=Single,5000&IO4.Set=High
 $PFAL,CNF.Set,AL12=Sys.Device.eStart=Reset,USER0:Sys.Counter0.set=8&(REPLACE9)
 ////Power status Handler
-$PFAL,CNF.Set,AL13=Sys.Power.sVoltage<9&Sys.nvCounter.s8<7:Sys.nvCounter8.Increment=1
-$PFAL,CNF.Set,AL14=Sys.Power.sVoltage>8&Sys.Power.sVoltage<9&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRL (REPLACE0)"
+$PFAL,CNF.Set,AL13=Sys.Timer.e1&Sys.Power.sVoltage<9&Sys.nvCounter.s8<7:Sys.nvCounter8.Increment=1
+$PFAL,CNF.Set,AL14=Sys.Power.sVoltage<9&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRL (REPLACE0)"
 $PFAL,CNF.Set,AL15=Sys.Power.sVoltage>10&Sys.nvCounter.s8=8:Sys.nvCounter8.Set=0&TCP.Client.Send,0,"PWRR (REPLACE0)"
-$PFAL,CNF.Set,AL16=Sys.Power.sVoltage<1&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRD (REPLACE0)"
+$PFAL,CNF.Set,AL16
 
 ////Ignition on/off Handler
 //Ignition Detection Logic (Driver has to turn the key all the way off for Ignition Off-Refer Document)
@@ -179,8 +184,8 @@ $PFAL,CNF.Set,AL33=Sys.nvCounter.s0=2&Sys.Timer.e3:TCP.Client.Send,0,"CANP (REPL
 
 ////Geofence Handler
 
-$PFAL,CNF.Set,AL48=GPS.Geofence.eX=inside&Sys.nvCounter.s1=1:Sys.nvCounter1.Set=2&TCP.Client.Send,0,"GEOIN (REPLACE1)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL49=GPS.Geofence.eX=outside&Sys.nvCounter.s1=2:Sys.nvCounter1.Set=1&TCP.Client.Send,0,"GEOEX (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL48=GPS.Geofence.eX=inside&GPS.Nav.sFix=valid&Sys.nvCounter.s1=1:Sys.nvCounter1.Set=2&TCP.Client.Send,0,"GEOIN (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL49=GPS.Geofence.eX=outside&GPS.Nav.sFix=valid&Sys.nvCounter.s1=2:Sys.nvCounter1.Set=1&TCP.Client.Send,0,"GEOEX (REPLACE1)(REPLACE2)(REPLACE3)"
 
 ////Poll Handler
 //Poll response over GPRS
@@ -226,7 +231,7 @@ $PFAL,CNF.Set,AL67=Sys.Trigger.s5=high&Sys.nvCounter.s0=1:Sys.Device.Reset,1
 $PFAL,CNF.Set,AL68=Sys.Device.eStart=Wakeup,Ign?Sys.Device.eStart=Wakeup,Timer?Sys.Device.eStart=Wakeup,Ring:Sys.Timer15.Start=Single,180000
 ////Sleep Mode Handler
 $PFAL,CNF.Set,AL69=Sys.Timer.e5&Sys.nvCounter.s10=1:Sys.Device.Sleep=Ign+Ring+ExtPwrDrop+Timer=12:00:00&TCP.Client.Send,0,"Sleep Mode Started &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix)"
-$PFAL,CNF.Set,AL70=Sys.Device.eStart=Wakeup,Timer:Sys.Timer5.Start=Single,300000
+$PFAL,CNF.Set,AL70=Sys.Device.eStart=Wakeup,Timer:Sys.Timer5.Start=Single,300000&TCP.Client.Send,0,"Sleep Mode Ended &(IMEI),&(Time),&(Date),&(Lat),&(Lon),&(Fix)"
 //Invalid Sleep safety
 $PFAL,CNF.Set,AL71=Sys.nvCounter.s0=2&Sys.Timer.s5=running:Sys.Timer5.Stop
 
@@ -252,14 +257,15 @@ $PFAL,CNF.Set,AL83=SYS.TIMER.e4&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&Sys.devi
 /////////////Below Alarm lines are Asset dependant///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Fault Detection
-$PFAL,CNF.Set,AL90=Sys.Can.e4&Sys.CAN.s4>0&Sys.nvCounter.s13=1:Sys.nvCounter13.Set=2&TCP.Client.Send,0,"Fault Detected &(IMEI),&(CanMsg6),&(CAN4),&(CAN5)"
-$PFAL,CNF.Set,AL91=Sys.Can.e4&Sys.CAN.s4=0&Sys.nvCounter.s13=2:Sys.nvCounter13.Set=1&TCP.Client.Send,0,"Fault Reset &(IMEI),&(CanMsg6),&(CAN4),&(CAN5)"
+$PFAL,CNF.Set,AL90=Sys.Can.e4&Sys.CAN.s4<65535:Sys.nvCounter13.Set=2&TCP.Client.Send,0,"Fault Detected &(IMEI),&(CanMsg6),&(CAN4),&(CAN5)"
+$PFAL,CNF.Set,AL91=Sys.Can.e4&Sys.CAN.s4=65535&Sys.nvCounter.s13=2:Sys.nvCounter13.Set=1&TCP.Client.Send,0,"Fault Reset &(IMEI),&(CanMsg6),&(CAN4),&(CAN5)"
 
 
 //Asset Shutdown Alert (FMI Based)
-$PFAL,CNF.Set,AL93=Sys.CAN.s5=0?Sys.CAN.s5=1:Sys.Trigger0=High
-$PFAL,CNF.Set,AL94=Sys.CAN.s5>1:Sys.Trigger0=Low
-$PFAL,CNF.Set,AL95=Sys.nvCounter.s13=2&Sys.Trigger.s0=High:Sys.Trigger0=Low&TCP.Client.Send,0,"Shutdown Alert &(IMEI),&(CanMsg6),&(CAN5)"
+$PFAL,CNF.Set,AL92=Sys.CAN.e5&Sys.CAN.s5=0:Sys.Trigger0=High
+$PFAL,CNF.Set,AL93=Sys.CAN.e5&Sys.CAN.s5=1:Sys.Trigger0=High
+$PFAL,CNF.Set,AL94=Sys.CAN.e5&Sys.CAN.s5>1:Sys.Trigger0=Low
+$PFAL,CNF.Set,AL95=Sys.Trigger.s0=High&Sys.CAN.s4>0:Sys.Trigger0=Low&TCP.Client.Send,0,"Shutdown Alert &(IMEI),&(CanMsg6),&(CAN5)"
 
 ////Tagin/Out Handler
 //Master/Authorised IDs
@@ -293,15 +299,17 @@ $PFAL,CNF.Set,AL97=Sys.Timer.e1&Sys.nvCounter.s14=59:Sys.nvCounter15.Increment=1
 $PFAL,CNF.Set,AL98=Sys.Timer.e1&Sys.nvCounter.s0=2&Sys.nvCounter.s14<59:Sys.nvCounter14.Increment=1
 $PFAL,CNF.Set,AL99=Sys.Timer.e1&Sys.nvCounter.s15=59:Sys.nvCounter16.Increment=1&Sys.nvCounter15.Set=0
 
+//Operation Hours
+$PFAL,CNF.Set,AL84=Sys.Timer.e1&Sys.nvCounter.s4=59:Sys.nvCounter7.Increment=1&Sys.nvCounter4.Set=0
+$PFAL,CNF.Set,AL85=Sys.Timer.e1&IO.s8=High&Sys.nvCounter.s4<59:Sys.nvCounter4.Increment=1
+$PFAL,CNF.Set,AL86=Sys.Timer.e1&Sys.nvCounter.s7=59:Sys.nvCounter9.Increment=1&Sys.nvCounter7.Set=0
+$PFAL,CNF.Set,AL24=IO.s8=Low&Sys.nvCounter.s4>0:TCP.Client.Send,0,"Operational Time is &(nvCounter9):&(nvCounter7) and &(nvCounter4) Seconds"&Sys.nvCounter9.Set=0&Sys.nvCounter7.Set=0&Sys.nvCounter4.Set=0
+
 //Preventing presence of unwanted alarms for this specific asset type
 
-$PFAL,CNF.Set,AL24
 $PFAL,CNF.Set,AL47
 $PFAL,CNF.Set,AL79
 $PFAL,CNF.Set,AL80
-$PFAL,CNF.Set,AL84
-$PFAL,CNF.Set,AL85
-$PFAL,CNF.Set,AL86
 $PFAL,CNF.Set,AL87
 $PFAL,CNF.Set,AL88
 $PFAL,CNF.Set,AL89
@@ -372,15 +380,6 @@ $PFAL,CNF.Set,TCP.CLIENT.PING=1,120000
 $PFAL,CNF.Set,GSM.OPLOST.RESTART=1,1200000,8
 
 //Geofences
-$PFAL,CNF.Set,GF.AREA4="Dubai Saliks"
-$PFAL,CNF.Set,GF0=area1,"park position",C,25.1491649,55.4899579,77,800
-$PFAL,CNF.Set,GF1=area10,"Safa Gate",C2,25.19422,55.26255,200
-$PFAL,CNF.Set,GF2=area10,"Barsha",C2,25.11655,55.19266,150
-$PFAL,CNF.Set,GF3=area10,"Al Garhoud",C2,25.23133,55.33600,100
-$PFAL,CNF.Set,GF4=area10,"AL Maktoum",C2,25.25277,55.32188,100
-$PFAL,CNF.Set,GF5=area10,"AL Mamzar South",R,25.28625,55.35884,25.28733,55.35966
-$PFAL,CNF.Set,GF6=area10,"Airport Tunnel",R,25.24887,55.38686,25.24967,55.38740
-$PFAL,CNF.Set,GF7=area10,"AL Mamzar North",R,25.29289,55.36003,25.29465,55.36114
 
 //Alarm hide
 $PFAL,Sys.Security.HideAlarm," R0O4A3M9W0O0R2K7S0"
