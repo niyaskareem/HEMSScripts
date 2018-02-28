@@ -10,8 +10,10 @@
 //										:	Asset shutdown logic improved
 //										:	Added timer inactive filter to protect starter motor of the pump while remote starting the pump
 //										:	Removed Geofences
+//133ED04								:	Resolved an issue where starvation start would not come in case of ign off while the starvation flag is raised and not confirmed
+//										:	Added one second timer protection
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Pump_133ED01
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Pump_133ED04
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -277,6 +279,9 @@ $PFAL,CNF.Set,AL97=Sys.Timer.e1&Sys.nvCounter.s14=59:Sys.nvCounter15.Increment=1
 $PFAL,CNF.Set,AL98=Sys.Timer.e1&Sys.nvCounter.s0=2&Sys.nvCounter.s14<59:Sys.nvCounter14.Increment=1
 $PFAL,CNF.Set,AL99=Sys.Timer.e1&Sys.nvCounter.s15=59:Sys.nvCounter16.Increment=1&Sys.nvCounter15.Set=0
 
+//one second timer protection
+$PFAL,CNF.Set,AL92=Sys.Timer.s1=inactive:Sys.Timer1.Start=Cyclic,1000
+
 //Preventing presence of unwanted alarms for this specific asset type
 
 $PFAL,CNF.Set,AL11
@@ -288,7 +293,6 @@ $PFAL,CNF.Set,AL47
 $PFAL,CNF.Set,AL79
 $PFAL,CNF.Set,AL80
 $PFAL,CNF.Set,AL84
-$PFAL,CNF.Set,AL92
 $PFAL,CNF.Set,AL93
 $PFAL,CNF.Set,AL94
 $PFAL,CNF.Set,AL95
