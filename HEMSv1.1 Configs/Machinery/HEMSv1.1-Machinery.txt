@@ -322,7 +322,7 @@ $PFAL,CNF.Set,AL23=Sys.Timer.e1&Sys.nvCounter.s0=2&Sys.nvCounter.s14<59:Sys.nvCo
 $PFAL,CNF.Set,AL24=Sys.Timer.e1&Sys.nvCounter.s15=59:Sys.nvCounter16.Increment=1&Sys.nvCounter15.Set=0
 
 //Harsh RPM
-$PFAL,CNF.Set,AL90=Sys.Can.s3>4000&Sys.Can.s3<7000&Sys.Trigger.s6=low:Sys.Trigger=high&TCP.Client.Send,0,"HARR (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL90=Sys.Can.s3>4000&Sys.Can.s3<7000&Sys.Trigger.s6=low:Sys.Trigger6=high&TCP.Client.Send,0,"HARR (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL94=Sys.Can.s3<3999&Sys.Trigger.s6=high:Sys.Trigger6=low
 
 ////EcoDrive Handler (We are starting and stopping trip with Ignition logic)
