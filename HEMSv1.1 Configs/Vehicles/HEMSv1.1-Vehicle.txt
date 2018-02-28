@@ -17,8 +17,10 @@
 //										:	Added GPS validity to Geofence events
 //										:	Added sleep mode end event
 //										:	Removed Geofences
+//133ED03								:	Removed timer 7 from Tag line
+//										:	Removed timer 1 stop from ignition logic that prevented ign on second time
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Vehicle_133ED01
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Vehicle_133ED03
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -120,12 +122,12 @@ $PFAL,CNF.Set,AL33
 
 ////Tagin/Out Handler
 //Master/Authorised IDs
-$PFAL,CNF.Set,AL34=Sys.eSerialData0.End="0B"?Sys.eSerialData0.End="36"?Sys.eSerialData0.End="F4"?Sys.eSerialData0.End="FD"?Sys.eSerialData0.End="F5":Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000
+$PFAL,CNF.Set,AL34=Sys.eSerialData0.End="0B"?Sys.eSerialData0.End="36"?Sys.eSerialData0.End="F4"?Sys.eSerialData0.End="FD"?Sys.eSerialData0.End="F5":Sys.Counter3.set=1
 //Ids Synced from ROAM and Other Authorised IDs
-$PFAL,CNF.Set,AL35=Sys.eSerialData0.End=Whitelist:Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000
+$PFAL,CNF.Set,AL35=Sys.eSerialData0.End=Whitelist:Sys.Counter3.set=1
 
 //Tagin
-$PFAL,CNF.Set,AL36=Sys.Counter.s3=1&Sys.nvCounter.s3=1:Sys.Counter3.clear&Sys.nvCounter3.Set=2&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
+$PFAL,CNF.Set,AL36=Sys.Counter.s3=1&Sys.nvCounter.s3=1:Sys.Counter3.clear&Sys.nvCounter3.Set=2&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
 $PFAL,CNF.Set,AL37=Sys.Timer.e6?Sys.Timer.e7?Sys.nvCounter.s3=7:IO4.Set=Low&Sys.Counter3.clear
 $PFAL,CNF.Set,AL38=Sys.nvCounter.s3=12?Sys.Counter.s3=1:IO4.Set=High
 $PFAL,CNF.Set,AL39=Sys.nvCounter.s0=2&Sys.Timer.s7=running:Sys.Timer7.Stop
@@ -135,11 +137,11 @@ $PFAL,CNF.Set,AL40=Sys.Timer.e7&Sys.nvCounter.s3=2&IO.s2=Low:Sys.nvCounter3.Set=
 $PFAL,CNF.Set,AL47=Sys.Timer.e7&Sys.nvCounter.s3>6:MSG.Send.Serial0,0,"&(bin=0x01,0x21)"&TCP.Client.Send,0,"TAGO (REPLACE1)(REPLACE2)(REPLACE3)"
 
 $PFAL,CNF.Set,AL41=Sys.nvCounter.s3=6:Sys.nvCounter3.Set=7&TCP.Client.Send,0,"IMMOA (REPLACE1)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL42=Sys.Counter.s3=1&Sys.nvCounter.s3=7&Sys.Timer.s7=inactive:Sys.Counter3.clear&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
+$PFAL,CNF.Set,AL42=Sys.Counter.s3=1&Sys.nvCounter.s3=7&Sys.timer.s7=inactive:Sys.Counter3.clear&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
 $PFAL,CNF.Set,AL43=Sys.nvCounter.s3=8:IO4.Set=Low&Sys.nvCounter3.Set=1&TCP.Client.Send,0,"IMMOR (REPLACE1)(REPLACE2)(REPLACE3)"
 
 $PFAL,CNF.Set,AL44=Sys.nvCounter.s3=11:Sys.nvCounter3.Set=12&TCP.Client.Send,0,"SERV (REPLACE1)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL45=Sys.Counter.s3=1&Sys.nvCounter.s3=12&Sys.Timer.s7=inactive:Sys.Counter3.clear&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
+$PFAL,CNF.Set,AL45=Sys.Counter.s3=1&Sys.nvCounter.s3=12&Sys.timer.s7=inactive:Sys.Counter3.clear&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
 $PFAL,CNF.Set,AL46=Sys.nvCounter.s3=13:IO4.Set=Low&Sys.nvCounter3.Set=1&TCP.Client.Send,0,"NORM (REPLACE1)(REPLACE2)(REPLACE3)"
 
 ////Geofence Handler

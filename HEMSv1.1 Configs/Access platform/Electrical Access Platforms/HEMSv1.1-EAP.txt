@@ -198,12 +198,12 @@ $PFAL,CNF.Set,AL83=SYS.TIMER.e4&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&Sys.devi
 
 ////Tagin/Out Handler
 //Master/Authorised IDs
-$PFAL,CNF.Set,AL34=Sys.eSerialData0.End="0B"?Sys.eSerialData0.End="36"?Sys.eSerialData0.End="F4"?Sys.eSerialData0.End="FD"?Sys.eSerialData0.End="F5":Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000
+$PFAL,CNF.Set,AL34=Sys.eSerialData0.End="0B"?Sys.eSerialData0.End="36"?Sys.eSerialData0.End="F4"?Sys.eSerialData0.End="FD"?Sys.eSerialData0.End="F5":Sys.Counter3.set=1
 //Ids Synced from ROAM and Other Authorised IDs
-$PFAL,CNF.Set,AL35=Sys.eSerialData0.End=Whitelist:Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000
+$PFAL,CNF.Set,AL35=Sys.eSerialData0.End=Whitelist:Sys.Counter3.set=1
 
 //Tagin
-$PFAL,CNF.Set,AL36=Sys.Counter.s3=1&Sys.nvCounter.s3=1:Sys.Counter3.clear&Sys.nvCounter3.Set=2&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
+$PFAL,CNF.Set,AL36=Sys.Counter.s3=1&Sys.nvCounter.s3=1:Sys.Counter3.clear&Sys.nvCounter3.Set=2&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
 $PFAL,CNF.Set,AL37=Sys.Timer.e6?Sys.Timer.e7?Sys.nvCounter.s3=7:IO4.Set=Low&Sys.Counter3.clear
 $PFAL,CNF.Set,AL38=Sys.nvCounter.s3=12?Sys.Counter.s3=1:IO4.Set=High
 $PFAL,CNF.Set,AL39=Sys.nvCounter.s0=2&Sys.Timer.s7=running:Sys.Timer7.Stop

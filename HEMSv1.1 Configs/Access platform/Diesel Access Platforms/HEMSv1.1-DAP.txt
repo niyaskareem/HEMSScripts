@@ -169,9 +169,9 @@ $PFAL,CNF.Set,AL20=Sys.nvCounter.s12=1&IO.s8=Low&Sys.Trigger.s1=High:Sys.Trigger
 $PFAL,CNF.Set,AL25=Sys.Timer.e1&Sys.Trigger.s1=High&Sys.CAN.s3>=200&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
 $PFAL,CNF.Set,AL26=Sys.Timer.e1&Sys.Trigger.s1=Low&Sys.CAN.s3<200&Sys.nvCounter.s5>0:Sys.nvCounter5.Decrement=1
 $PFAL,CNF.Set,AL27=Sys.nvCounter.s5=8&Sys.nvCounter.s0=1:Sys.nvCounter0.set=2&Sys.MACRO1&Sys.Timer5.Stop&Sys.MACRO5&TCP.Client.Send,0,"IN8H (REPLACE1)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL28=Sys.nvCounter.s5=8&Sys.nvCounter.s0=1:GPS.Nav.Distance.Load&Sys.Timer7.Stop&GPS.Nav.Position1=current&Sys.Timer1.Start=Cyclic,1000
+$PFAL,CNF.Set,AL28=Sys.nvCounter.s5=8&Sys.nvCounter.s0=1:GPS.Nav.Distance.Load&Sys.Timer7.Stop&GPS.Nav.Position1=current
 $PFAL,CNF.Set,AL29=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:Sys.nvCounter0.set=1&Sys.Timer3.Stop&Sys.MACRO2&Sys.Timer13.stop&TCP.Client.Send,0,"IN8L (REPLACE1)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL30=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:GPS.Nav.Distance.Save&Sys.Timer7.Start=Single,25000&Sys.Timer1.stop
+$PFAL,CNF.Set,AL30=Sys.nvCounter.s5<=1&Sys.nvCounter.s0=2:GPS.Nav.Distance.Save&Sys.Timer7.Start=Single,25000
 
 //For analog Assets without RPM
 $PFAL,CNF.Set,AL21=Sys.Timer.e1&Sys.nvCounter.s12=1&Sys.Trigger.s1=High&IO.s8=High&Sys.nvCounter.s5<8:Sys.nvCounter5.Increment=1&Sys.nvCounter6.Set=0
@@ -269,12 +269,12 @@ $PFAL,CNF.Set,AL95=Sys.Trigger.s0=High&Sys.CAN.s4>0:Sys.Trigger0=Low&TCP.Client.
 
 ////Tagin/Out Handler
 //Master/Authorised IDs
-$PFAL,CNF.Set,AL34=Sys.eSerialData0.End="0B"?Sys.eSerialData0.End="36"?Sys.eSerialData0.End="F4"?Sys.eSerialData0.End="FD"?Sys.eSerialData0.End="F5":Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000
+$PFAL,CNF.Set,AL34=Sys.eSerialData0.End="0B"?Sys.eSerialData0.End="36"?Sys.eSerialData0.End="F4"?Sys.eSerialData0.End="FD"?Sys.eSerialData0.End="F5":Sys.Counter3.set=1
 //Ids Synced from ROAM and Other Authorised IDs
-$PFAL,CNF.Set,AL35=Sys.eSerialData0.End=Whitelist:Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000
+$PFAL,CNF.Set,AL35=Sys.eSerialData0.End=Whitelist:Sys.Counter3.set=1
 
 //Tagin
-$PFAL,CNF.Set,AL36=Sys.Counter.s3=1&Sys.nvCounter.s3=1:Sys.Counter3.clear&Sys.nvCounter3.Set=2&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
+$PFAL,CNF.Set,AL36=Sys.Counter.s3=1&Sys.nvCounter.s3=1:Sys.Counter3.clear&Sys.nvCounter3.Set=2&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
 $PFAL,CNF.Set,AL37=Sys.Timer.e6?Sys.Timer.e7?Sys.nvCounter.s3=7:IO4.Set=Low&Sys.Counter3.clear
 $PFAL,CNF.Set,AL38=Sys.nvCounter.s3=12?Sys.Counter.s3=1:IO4.Set=High
 $PFAL,CNF.Set,AL39=Sys.nvCounter.s0=2&Sys.Timer.s7=running:Sys.Timer7.Stop
