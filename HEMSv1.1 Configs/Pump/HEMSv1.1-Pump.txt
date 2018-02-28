@@ -268,8 +268,9 @@ $PFAL,CNF.Set,AL85=IO.e0=fedge&Sys.nvCounter.s0=2&Sys.nvCounter.s11=1&Sys.Timer.
 $PFAL,CNF.Set,AL86=Sys.Timer.e8&IO.s0=Low&Sys.nvCounter.s0=2&Sys.nvCounter.s11=2:Sys.nvCounter11.Set=3&TCP.Client.Send,0,"STARVS (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL87=Sys.nvCounter.s11=3&IO.e0=redge&Sys.nvCounter.s0=2&Sys.Timer.s8=inactive:Sys.nvCounter11.Set=4&Sys.Timer12.Start=Single,120000
 $PFAL,CNF.Set,AL88=Sys.Timer.e12&IO.s0=High&Sys.nvCounter.s0=2&Sys.nvCounter.s11=4:Sys.nvCounter11.Set=1&TCP.Client.Send,0,"STARVE (REPLACE1)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL89=Sys.nvCounter.s11=3&Sys.nvCounter.s0=1:Sys.nvCounter11.Set=1&TCP.Client.Send,0,"STARVE (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL89=Sys.nvCounter.s11>=3&Sys.nvCounter.s0=1:Sys.nvCounter11.Set=1&TCP.Client.Send,0,"STARVE (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL90=Sys.nvCounter.s0=2&Sys.Timer.s8=running&IO.s0=High:Sys.nvCounter11.Set=1&Sys.Timer8.stop&Sys.Timer12.stop
+$PFAL,CNF.Set,AL91=Sys.nvCounter.s0=1&Sys.nvCounter.s11=2:Sys.nvCounter11.Set=1
 
 //Hourmeter
 $PFAL,CNF.Set,AL97=Sys.Timer.e1&Sys.nvCounter.s14=59:Sys.nvCounter15.Increment=1&Sys.nvCounter14.Set=0
@@ -287,7 +288,6 @@ $PFAL,CNF.Set,AL47
 $PFAL,CNF.Set,AL79
 $PFAL,CNF.Set,AL80
 $PFAL,CNF.Set,AL84
-$PFAL,CNF.Set,AL91
 $PFAL,CNF.Set,AL92
 $PFAL,CNF.Set,AL93
 $PFAL,CNF.Set,AL94
