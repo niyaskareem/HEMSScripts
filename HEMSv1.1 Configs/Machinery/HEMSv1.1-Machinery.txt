@@ -15,8 +15,11 @@
 //										:	Added GPS validity to Geofence events
 //										:	Removed Power disconnect
 //										:	Removed Geofences
+//133ED04								:	Resolved an issue where tag in was missing while the device is immobilizer activated
+//										:	Resolved an issue where you would not get ignition on the second time and the user has to reset the device but to repeat the same
+//										:	Added one second timer protection
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Machinery_133ED01
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Machinery_133ED04
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -174,7 +177,6 @@ $PFAL,CNF.Set,AL12=Sys.Device.eStart=Reset,USER0:Sys.Counter0.set=8&(REPLACE9)
 $PFAL,CNF.Set,AL13=Sys.Timer.e1&Sys.Power.sVoltage<9&Sys.nvCounter.s8<7:Sys.nvCounter8.Increment=1
 $PFAL,CNF.Set,AL14=Sys.Power.sVoltage<9&Sys.nvCounter.s8=7:Sys.nvCounter8.Set=8&TCP.Client.Send,0,"PWRL (REPLACE0)"
 $PFAL,CNF.Set,AL15=Sys.Power.sVoltage>10&Sys.nvCounter.s8=8:Sys.nvCounter8.Set=0&TCP.Client.Send,0,"PWRR (REPLACE0)"
-$PFAL,CNF.Set,AL16
 
 ////Ignition on/off Handler
 //Ignition Detection Logic (Driver has to turn the key all the way off for Ignition Off-Refer Document)
@@ -340,6 +342,9 @@ $PFAL,CNF.Set,AL96=GPS.Nav.Position.s1>2000&Sys.nvCounter.s0=2&GPS.Nav.sFix=corr
 $PFAL,CNF.Set,AL97=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s10=inactive&Ecodrive.eHarshTurn:Sys.Timer10.Start=Single,15000&TCP.Client.Send,0,"HARC (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL98=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s11=inactive&Ecodrive.eHarshBrake:Sys.Timer11.Start=Single,15000&TCP.Client.Send,0,"HARD (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL99=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s12=inactive&Ecodrive.eHarshAccelerate:Sys.Timer12.Start=Single,15000&TCP.Client.Send,0,"HARA (REPLACE1)(REPLACE2)(REPLACE3)"
+
+//Once second timer protection
+$PFAL,CNF.Set,AL16=Sys.Timer.s1=inactive:Sys.Timer1.Start=Cyclic,1000
 
 //Prevent over writing of alarms
 

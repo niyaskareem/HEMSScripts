@@ -19,8 +19,9 @@
 //										:	Removed Geofences
 //133ED03								:	Removed timer 7 from Tag line
 //										:	Removed timer 1 stop from ignition logic that prevented ign on second time
+//133ED04								:	Added one second timer protection
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Vehicle_133ED03
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Vehicle_133ED04
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -156,7 +157,7 @@ $PFAL,CNF.Set,AL50=Sys.Counter.s2=1:Sys.Counter2.clear&TCP.Client.Send,0,"POLLR 
 //Poll response over SMS
 $PFAL,CNF.Set,AL51=GSM.SMS.eIncoming.Text="POLL":GSM.SMS.Send,"&(SMSNumber)",0,"Poll response for &(IMEI)Location:&(Lat),&(Lon)Speed:&(Speed)Dist:&(NavDist)GPRS:&(GPRS)TCP:&(TCPClient)Operator:&(OperatorID)"
 $PFAL,CNF.Set,AL52=GSM.SMS.eIncoming.Text="CANPOLL":GSM.SMS.Send,"&(SMSNumber)",0,"Poll response for &(IMEI)Location:&(Lat),&(Lon)Speed:&(Speed)Dist:&(NavDist)GPRS:&(GPRS)TCP:&(TCPClient)Operator:&(OperatorID)DTC:&(CanMsg6)RPM:&(CAN3)"
-$PFAL,CNF.Set,AL53
+
 ////LED Handler
 //Orange LED
 //Off
@@ -247,6 +248,9 @@ $PFAL,CNF.Set,AL96=GPS.Nav.Position.s1>20&Sys.nvCounter.s0=2&GPS.Nav.sFix=correc
 $PFAL,CNF.Set,AL97=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s10=inactive&Ecodrive.eHarshTurn:Sys.Timer10.Start=Single,15000&TCP.Client.Send,0,"HARC (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL98=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s11=inactive&Ecodrive.eHarshBrake:Sys.Timer11.Start=Single,15000&TCP.Client.Send,0,"HARD (REPLACE1)(REPLACE2)(REPLACE3)"
 $PFAL,CNF.Set,AL99=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s12=inactive&Ecodrive.eHarshAccelerate:Sys.Timer12.Start=Single,15000&TCP.Client.Send,0,"HARA (REPLACE1)(REPLACE2)(REPLACE3)"
+
+//Once second timer protection
+$PFAL,CNF.Set,AL53=Sys.Timer.s1=inactive:Sys.Timer1.Start=Cyclic,1000
 
 // -----------------------------------------------------------------------------------
 // OTHER SETTINGS:

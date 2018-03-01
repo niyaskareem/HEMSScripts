@@ -10,8 +10,9 @@
 //										:	Asset shutdown logic improved
 //										:	Removed Power disconnect event
 //										:	Removed Geofences
+//133ED04								:	Added one second timer protection
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Generator_133ED01
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Generator_133ED04
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -272,6 +273,9 @@ $PFAL,CNF.Set,AL97=Sys.Timer.e1&Sys.nvCounter.s14=59:Sys.nvCounter15.Increment=1
 $PFAL,CNF.Set,AL98=Sys.Timer.e1&Sys.nvCounter.s0=2&Sys.nvCounter.s14<59:Sys.nvCounter14.Increment=1
 $PFAL,CNF.Set,AL99=Sys.Timer.e1&Sys.nvCounter.s15=59:Sys.nvCounter16.Increment=1&Sys.nvCounter15.Set=0
 
+//One second timer protection
+$PFAL,CNF.Set,AL91=Sys.Timer.s1=inactive:Sys.Timer1.Start=Cyclic,1000
+
 //Preventing presence of unwanted alarms for this specific asset type
 $PFAL,CNF.Set,AL11
 $PFAL,CNF.Set,AL47
@@ -285,7 +289,6 @@ $PFAL,CNF.Set,AL87
 $PFAL,CNF.Set,AL88
 $PFAL,CNF.Set,AL89
 $PFAL,CNF.Set,AL90
-$PFAL,CNF.Set,AL91
 $PFAL,CNF.Set,AL92
 $PFAL,CNF.Set,AL93
 $PFAL,CNF.Set,AL94

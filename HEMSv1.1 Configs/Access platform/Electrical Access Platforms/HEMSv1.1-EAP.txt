@@ -11,8 +11,9 @@
 //133ED01								:	Changed Powerloss logic
 //										:	Removed Power disconnect event
 //										:	Removed Geofences
+//133ED04								:	Added one second timer protection
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-EAP_133ED01
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-EAP_133ED04
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -236,6 +237,9 @@ $PFAL,CNF.Set,AL86=Sys.Timer.e1&Sys.nvCounter.s9>=2:Sys.nvCounter7.Increment=1
 $PFAL,CNF.Set,AL87=Sys.nvCounter.s7>29400&Sys.Trigger.s2=Low:Sys.Trigger2=High&Sys.Trigger2.save2&TCP.Client.Send,0,"CHEXC (REPLACE1)(REPLACE2)(REPLACE7)"
 $PFAL,CNF.Set,AL88=Sys.nvCounter.s9>=2&IO.s2=Low&Sys.nvCounter.s4<1:TCP.Client.Send,0,"BATCHE (REPLACE1)(REPLACE2)(REPLACE7)"&Sys.nvCounter9.Set=1&Sys.nvCounter7.Set=0&Sys.Trigger2=Low&Sys.Trigger2.save2
 $PFAL,CNF.Set,AL89=Sys.nvCounter.s9=2&Sys.nvCounter.s0=2:Sys.nvCounter9.Set=3&TCP.Client.Send,0,"CHVIO (REPLACE1)(REPLACE2)(REPLACE3)"
+
+//One second timer protection
+$PFAL,CNF.Set,AL91=Sys.Timer.s1=inactive:Sys.Timer1.Start=Cyclic,1000
 
 //Preventing presence of unwanted alarms for this specific asset type
 
