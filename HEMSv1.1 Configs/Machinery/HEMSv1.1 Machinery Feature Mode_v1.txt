@@ -43,13 +43,14 @@ $PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,300000
 
 ///////////////Overspeed
 ////OverSpeed Handler
-$PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>40&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s7<7:Sys.nvCounter7.Increment=1
+$PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>23&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s7<4:Sys.nvCounter7.Increment=1
+$PFAL,CNF.Set,AL93=Sys.nvCounter.s0=2&GPS.Nav.sSpeed<22&Sys.nvCounter.s7=5:Sys.nvCounter7.Set=0&TCP.Client.Send,0,"OSPE (REPLACE1)(REPLACE2)(REPLACE3)"
 //Overspeed setting as per customer requirement needs to be set in m/s onto nvCounter 11
-$PFAL,CNF.Set,AL0=Sys.Counter.s0>=1&Sys.nvCounter.s11=0:Sys.nvCounter11.Set=34
+$PFAL,CNF.Set,AL0=Sys.Counter.s0>=1&Sys.nvCounter.s11=0:Sys.nvCounter11.Set=23
 
 //Feature enabler
-$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter3.Set=1&Sys.nvCounter4.Set=1&Sys.nvCounter6.Set=0
-$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter7.Set=1&Sys.nvCounter8.Set=1&Sys.nvCounter12.Set=0&Sys.nvCounter13.Set=1&Sys.nvCounter0.Set=1
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter3.Set=1&Sys.nvCounter4.Set=1&Sys.nvCounter6.Set=0&Sys.nvCounter7.Set=1
+$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter8.Set=1&Sys.nvCounter12.Set=0&Sys.nvCounter13.Set=1&Sys.nvCounter0.Set=1
 
 //Baudrate change for RFID
 $PFAL,CNF.Set,DEVICE.SERIAL0.BAUDRATE=38400
