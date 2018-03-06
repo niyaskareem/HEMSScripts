@@ -14,8 +14,14 @@
 //										:	Removed Power disconnect event
 //										:	Removed Geofences
 //133ED04								:	Added one second timer protection
+//133ED52								:	Added Erase backup
+//										:	Added timer6 for 15s to tagin so that output is not always grounded
+//										:	Removed IO2 dependency on Tagout logic
+//										:	Removed tagout incase of analog installation to prevent multiple tagout
+//										:	Changed tagout timer to 1 second once the device boots
+//										:	Removed timer6 from boot as we will not allow driver to operate in case of a reboot
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-DAP_133ED04
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-DAP_133ED52
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -135,6 +141,9 @@ $PFAL,Sys.CAN.Var.Add,6,Number,State,ext,00F00300,2,0,2,7,LSB,0,1,1,0
 $PFAL,Sys.Can.Msg.Add,ext,00FEFC00,00FFFF00
 //$PFAL,Sys.CAN.Var.Add,11,Number,State,ext,00FEFC00,1,0,1,7,LSB,0,1,25,0
 
+////Erase backup
+$PFAL,CNF.EraseBackup
+
 ////Power up Handler (//Add Boot_counter,Device name,location info)
 
 $PFAL,CNF.Set,AL0
@@ -150,7 +159,7 @@ $PFAL,CNF.Set,AL9=Sys.Counter.s0>=1&Sys.Timer.e2:TCP.Client.Send,0,"PWRUP (REPLA
 
 //To retain the status in case unit reboot in between journey
 $PFAL,CNF.Set,AL10=Sys.Device.eStart&Sys.nvCounter.s0=2:Sys.MACRO1&Sys.Timer5.Stop&Sys.Timer13.stop&GPS.Nav.Distance.Load&Sys.Timer1.Start=Cyclic,1000
-$PFAL,CNF.Set,AL11=Sys.Device.eStart&Sys.nvCounter.s0=1&Sys.nvCounter.s3=2:Sys.Timer7.Start=Single,5000&Sys.Timer6.Start=Single,5000&IO4.Set=High
+$PFAL,CNF.Set,AL11=Sys.Device.eStart&Sys.nvCounter.s0=1&Sys.nvCounter.s3=2:Sys.Timer7.Start=Single,1000
 $PFAL,CNF.Set,AL12=Sys.Device.eStart=Reset,USER0:Sys.Counter0.set=8&(REPLACE9)
 ////Power status Handler
 $PFAL,CNF.Set,AL13=Sys.Timer.e1&Sys.Power.sVoltage<9&Sys.nvCounter.s8<7:Sys.nvCounter8.Increment=1
@@ -270,19 +279,19 @@ $PFAL,CNF.Set,AL95=Sys.Trigger.s0=High&Sys.CAN.s4>0:Sys.Trigger0=Low&TCP.Client.
 
 ////Tagin/Out Handler
 //Master/Authorised IDs
-$PFAL,CNF.Set,AL34=Sys.eSerialData0.End="0B"?Sys.eSerialData0.End="36"?Sys.eSerialData0.End="F4"?Sys.eSerialData0.End="FD"?Sys.eSerialData0.End="F5":Sys.Counter3.set=1
+$PFAL,CNF.Set,AL34=Sys.eSerialData0.End="0B"?Sys.eSerialData0.End="36"?Sys.eSerialData0.End="F4"?Sys.eSerialData0.End="FD"?Sys.eSerialData0.End="F5":Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000
 //Ids Synced from ROAM and Other Authorised IDs
-$PFAL,CNF.Set,AL35=Sys.eSerialData0.End=Whitelist:Sys.Counter3.set=1
+$PFAL,CNF.Set,AL35=Sys.eSerialData0.End=Whitelist:Sys.Counter3.set=1&Sys.Timer6.Start=Single,15000
 
 //Tagin
 $PFAL,CNF.Set,AL36=Sys.Counter.s3=1&Sys.nvCounter.s3=1:Sys.Counter3.clear&Sys.nvCounter3.Set=2&Sys.Timer6.Start=Single,15000&Sys.Timer7.Start=Single,25000&TCP.Client.Send,0,"TAGI (REPLACE5)"
 $PFAL,CNF.Set,AL37=Sys.Timer.e6?Sys.Timer.e7?Sys.nvCounter.s3=7:IO4.Set=Low&Sys.Counter3.clear
 $PFAL,CNF.Set,AL38=Sys.nvCounter.s3=12?Sys.Counter.s3=1:IO4.Set=High
 $PFAL,CNF.Set,AL39=Sys.nvCounter.s0=2&Sys.Timer.s7=running:Sys.Timer7.Stop
-$PFAL,CNF.Set,AL40=Sys.Timer.e7&Sys.nvCounter.s3=2&IO.s2=Low:Sys.nvCounter3.Set=1&TCP.Client.Send,0,"TAGO (REPLACE1)(REPLACE2)(REPLACE3)"&MSG.Send.Serial0,0,"&(bin=0x01,0x21)"
+$PFAL,CNF.Set,AL40=Sys.Timer.e7&Sys.nvCounter.s3=2:Sys.nvCounter3.Set=1&TCP.Client.Send,0,"TAGO (REPLACE1)(REPLACE2)(REPLACE3)"&MSG.Send.Serial0,0,"&(bin=0x01,0x21)"
 
 //For analog Assets without RPM
-$PFAL,CNF.Set,AL89=Sys.nvCounter.s12=1&Sys.Timer.e7&Sys.nvCounter.s3=2:Sys.nvCounter3.Set=1&MSG.Send.Serial0,0,"&(bin=0x01,0x21)"&TCP.Client.Send,0,"TAGO (REPLACE1)(REPLACE2)(REPLACE3)"
+
 
 //Tagout even when the device is in other tag modes
 $PFAL,CNF.Set,AL23=Sys.Timer.e7&Sys.nvCounter.s3>6:MSG.Send.Serial0,0,"&(bin=0x01,0x21)"&TCP.Client.Send,0,"TAGO (REPLACE1)(REPLACE2)(REPLACE3)"
@@ -317,7 +326,6 @@ $PFAL,CNF.Set,AL80
 $PFAL,CNF.Set,AL87
 $PFAL,CNF.Set,AL88
 $PFAL,CNF.Set,AL89
-
 
 // -----------------------------------------------------------------------------------
 // OTHER SETTINGS:
