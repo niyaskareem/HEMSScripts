@@ -12,8 +12,9 @@
 //										:	Removed Geofences
 //133ED04								:	Resolved an issue where starvation start would not come in case of ign off while the starvation flag is raised and not confirmed
 //										:	Added one second timer protection
+//133ED52								:	Added Erase backup
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Pump_133ED04
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Pump_133ED52
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -126,6 +127,9 @@ $PFAL,Sys.CAN.Var.Add,5,Number,State,ext,00FECA00,4,0,4,4,LSB,0,1,1,0
 //CanMsg7 = Dash Display
 $PFAL,Sys.Can.Msg.Add,ext,00FEFC00,00FFFF00
 //$PFAL,Sys.CAN.Var.Add,11,Number,State,ext,00FEFC00,1,0,1,7,LSB,0,1,25,0
+
+////Erase backup
+$PFAL,CNF.EraseBackup
 
 ////Power up Handler (//Add Boot_counter,Device name,location info)
 
