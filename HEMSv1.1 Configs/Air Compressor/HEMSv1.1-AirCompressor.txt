@@ -12,8 +12,9 @@
 //										:	Removed Geofences
 //										:	Changed the replaces to match the message format
 //133ED04								:	Added one second timer protection
+//133ED52								:	Added erase backup
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-AirCompressor_133ED04
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-AirCompressor_133ED52
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -141,6 +142,9 @@ $PFAL,Sys.CAN.Var.Add,11,Number,State,ext,00FEFF00,0,6,0,7,LSB,0,1,1,0
 //CanMsg14 = Dash Display
 $PFAL,Sys.Can.Msg.Add,ext,00FEFC00,00FFFF00
 //$PFAL,Sys.CAN.Var.Add,11,Number,State,ext,00FEFC00,1,0,1,7,LSB,0,1,25,0
+
+////Erase backup
+$PFAL,CNF.EraseBackup
 
 ////Power up Handler (//Add Boot_counter,Device name,location info)
 
