@@ -11,8 +11,9 @@
 //										:	Removed Power disconnect event
 //										:	Removed Geofences
 //133ED04								:	Added one second timer protection
+//133ED52 								:	Added erase backup
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Generator_133ED04
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Generator_133ED52
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -128,6 +129,8 @@ $PFAL,Sys.CAN.Var.Add,10,Number,State,ext,00FEE900,4,0,7,7,LSB,0,1,2,0
 $PFAL,Sys.Can.Msg.Add,ext,00FEFC00,00FFFF00
 $PFAL,Sys.CAN.Var.Add,11,Number,State,ext,00FEFC00,1,0,1,7,LSB,0,1,25,0
 
+////Erase backup
+$PFAL,CNF.EraseBackup
 
 ////Power up Handler (//Add Boot_counter,Device name,Immobilizer status,location info)
 
