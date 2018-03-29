@@ -4,7 +4,7 @@
 //$PFAL,Sys.nvCounter10.Set=1
 ////////////////////////Tagin Enable/DIsable
 //$PFAL,Sys.nvCounter3.Set=0
-////////////////////////Idling Enable/Disable
+////////////////////////Fault Enable/Disable
 //$PFAL,Sys.nvCounter4.Set=0
 ///////////////////////Towing Enable
 //$PFAL,Sys.nvCounter6.Set=0
@@ -34,13 +34,13 @@ $PFAL,CNF.Set,MACRO1=Sys.Timer3.Start=Cyclic,300000
 //Sleep timer
 $PFAL,CNF.Set,MACRO2=Sys.Timer5.Start=Single,14400000
 //Idling timer
-$PFAL,CNF.Set,MACRO3=Sys.Timer8.Start=Single,900000
+$PFAL,CNF.Set,MACRO3
 //Towing periodic
 $PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
 //5 Minutes timer for CAN request
 $PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,300000
 
-$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter3.Set=0&Sys.nvCounter4.Set=0&Sys.nvCounter6.Set=0
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter3.Set=0&Sys.nvCounter4.Set=1&Sys.nvCounter6.Set=1
 $PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter7.Set=9&Sys.nvCounter8.Set=0&Sys.nvCounter12.Set=0&Sys.nvCounter0.Set=1
 
 ////////////////////////Backup

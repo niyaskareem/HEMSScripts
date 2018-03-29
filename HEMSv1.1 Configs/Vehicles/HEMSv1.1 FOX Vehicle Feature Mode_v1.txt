@@ -7,13 +7,13 @@
 ////Idling Enable/Disable
 //$PFAL,Sys.nvCounter4.Set=1
 ////Towing Enable
-//$PFAL,Sys.nvCounter6.Set=0
+//$PFAL,Sys.nvCounter6.Set=1
 ////Towing Disable
-//$PFAL,Sys.nvCounter6.Set=9 
+//$PFAL,Sys.nvCounter6.Set=0 
 ////Overspeed Enable
-//$PFAL,Sys.nvCounter7.Set=0
+//$PFAL,Sys.nvCounter7.Set=1
 ////Overspeed Disable
-//$PFAL,Sys.nvCounter7.Set=9
+//$PFAL,Sys.nvCounter7.Set=0
 ////Power Status Enable
 //$PFAL,Sys.nvCounter8.Set=0
 ////Power Status Disable
@@ -32,23 +32,24 @@ $PFAL,CNF.Set,MACRO0=Sys.Timer2.Start=Single,180000
 $PFAL,CNF.Set,MACRO1=Sys.Timer3.Start=Cyclic,300000
 //Sleep timer
 $PFAL,CNF.Set,MACRO2=Sys.Timer5.Start=Single,14400000
-//Idling timer
-$PFAL,CNF.Set,MACRO3=Sys.Timer8.Start=Single,900000
 //Towing periodic
 $PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
 //Position report timer
 $PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,3600000
 
+///////////////Idling Time (Set desired idling time to nvCounter12 in seconds)
+$PFAL,CNF.Set,AL86=Sys.nvCounter.s13>=120&Sys.nvCounter.s4=1:Sys.nvCounter4.Set=2&TCP.Client.Send,0,"IDLS (REPLACE1)(REPLACE2)(REPLACE3)"
+
 ///////////////Overspeed
 ////OverSpeed Handler
-$PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>23&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.nvCounter.s7<4:Sys.nvCounter7.Increment=1
-$PFAL,CNF.Set,AL93=Sys.nvCounter.s0=2&GPS.Nav.sSpeed<22&Sys.nvCounter.s7=5:Sys.nvCounter7.Set=0&TCP.Client.Send,0,"OSPE (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>23&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.Counter.s5<4:Sys.Counter5.Increment=1
+$PFAL,CNF.Set,AL93=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>2&GPS.Nav.sSpeed<22&Sys.nvCounter.s7=2:Sys.nvCounter7.Set=1&TCP.Client.Send,0,"OSPE (REPLACE1)(REPLACE2)(REPLACE3)"
 //Overspeed setting as per customer requirement needs to be set in m/s onto nvCounter 11
-$PFAL,CNF.Set,AL0=Sys.Counter.s0>=1&Sys.nvCounter.s11=0:Sys.nvCounter11.Set=23
+$PFAL,CNF.Set,AL5=Sys.nvCounter.s11=0:Sys.nvCounter11.Set=23
 
 ///////////////Asset Features
-$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter3.Set=1&Sys.nvCounter4.Set=1&Sys.nvCounter6.Set=0
-$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter7.Set=0&Sys.nvCounter8.Set=0&Sys.nvCounter0.Set=1
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter3.Set=1&Sys.nvCounter4.Set=1&Sys.nvCounter6.Set=1
+$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter7.Set=1&Sys.nvCounter8.Set=0&Sys.nvCounter0.Set=1
 
 //Baudrate change
 $PFAL,CNF.Set,DEVICE.SERIAL0.BAUDRATE=38400

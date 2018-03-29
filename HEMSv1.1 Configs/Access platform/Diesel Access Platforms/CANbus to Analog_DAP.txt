@@ -1,0 +1,12 @@
+////////////////If the device is canbus (requires HW connection change)
+$PFAL,Sys.CAN.Disable
+//When can is disabled, green line become IO2, therefore this line needs to be connected to the alternator
+//Send this to change the Ignition detection from RPM dependent to IO based
+$PFAL,Sys.nvCounter12.Set=1
+//Change the below lines with the change in the above counter from 0 to 1.
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter6.Set=1&Sys.nvCounter12.Set=1&Sys.nvCounter3.Set=1
+$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter8.Set=0&Sys.nvCounter11.Set=1&Sys.nvCounter0.Set=1
+//Erase the old back up
+$PFAL,CNF.EraseBackup
+//Back up the new change
+$PFAL,CNF.Backup

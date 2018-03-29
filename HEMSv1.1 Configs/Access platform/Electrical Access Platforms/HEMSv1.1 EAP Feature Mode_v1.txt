@@ -38,7 +38,7 @@ $PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
 //5 Minutes timer for CAN request
 //$PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,300000
 
-$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter6.Set=0&Sys.nvCounter3.Set=1&Sys.nvCounter9.Set=1
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter6.Set=1&Sys.nvCounter3.Set=1&Sys.nvCounter9.Set=1
 $PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter8.Set=0&Sys.nvCounter0.Set=1
 
 //Baudrate change for RFID

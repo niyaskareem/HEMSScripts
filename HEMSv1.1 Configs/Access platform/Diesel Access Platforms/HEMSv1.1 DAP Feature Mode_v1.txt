@@ -2,6 +2,8 @@
 //$PFAL,Sys.nvCounter1.Set=1
 ////////////////////////Sleep Mode Enable/Disable
 //$PFAL,Sys.nvCounter10.Set=1
+///////////////////////Fault Enable/Disable
+//$PFAL,Sys.nvCounter11.Set=1
 ///////////////////////Towing Enable
 //$PFAL,Sys.nvCounter6.Set=0
 ////Towing Disable
@@ -36,8 +38,8 @@ $PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
 //5 Minutes timer for CAN request
 $PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,300000
 
-$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter6.Set=0&Sys.nvCounter12.Set=0&Sys.nvCounter3.Set=1
-$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter8.Set=0&Sys.nvCounter0.Set=1
+$PFAL,CNF.Set,AL72=Sys.nvCounter.s0=0:Sys.nvCounter1.Set=1&Sys.nvCounter10.Set=1&Sys.nvCounter6.Set=1&Sys.nvCounter12.Set=0&Sys.nvCounter3.Set=1
+$PFAL,CNF.Set,AL78=Sys.nvCounter.s0=0:Sys.nvCounter8.Set=0&Sys.nvCounter11.Set=1&Sys.nvCounter0.Set=1
 
 //Baudrate change for RFID
 $PFAL,CNF.Set,DEVICE.SERIAL0.BAUDRATE=38400
