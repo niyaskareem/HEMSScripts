@@ -260,7 +260,8 @@ $PFAL,CNF.Set,AL94=Sys.Counter.s1=45:Sys.nvCounter13.Set=0&Sys.nvCounter4.Set=1&
 ////OverSpeed Handler
 $PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>23&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.Counter.s5<4:Sys.Counter5.Increment=1
 $PFAL,CNF.Set,AL92=Sys.nvCounter.s0=2&Sys.Counter.s5=4&Sys.nvCounter.s7=1:Sys.nvCounter7.Set=2&TCP.Client.Send,0,"OSPS (REPLACE7)(REPLACE2)(REPLACE3)"
-$PFAL,CNF.Set,AL93=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>2&GPS.Nav.sSpeed<22&Sys.nvCounter.s7=2:Sys.nvCounter7.Set=1&Sys.Counter5.Set=0&TCP.Client.Send,0,"OSPE (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL93=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>1&GPS.Nav.sSpeed<22&Sys.nvCounter.s7=2:Sys.Counter5.Set=0&Sys.nvCounter7.Set=1&TCP.Client.Send,0,"OSPE (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL79=Sys.nvCounter.s0=1&Sys.nvCounter.s7=2:Sys.Counter5.Set=0&Sys.nvCounter7.Set=1
 
 ////EcoDrive Handler (We are starting and stopping trip with Ignition logic)
 
@@ -283,7 +284,7 @@ $PFAL,CNF.Set,AL99=Sys.nvCounter.s0=2&GPS.Nav.sFix=valid&Sys.timer.s12=inactive&
 //Once second timer protection
 $PFAL,CNF.Set,AL21=Sys.Timer.s1=inactive:Sys.Timer1.Start=Cyclic,1000
 
-$PFAL,CNF.Set,AL79
+
 $PFAL,CNF.Set,AL84
 
 // -----------------------------------------------------------------------------------

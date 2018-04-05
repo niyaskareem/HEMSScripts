@@ -38,6 +38,9 @@ $PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
 //5 Minutes timer for CAN request
 //$PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,300000
 
+//Can Disable
+$PFAL,Sys.CAN.Disable
+
 //Adjusting the IO to cater different voltages maximum upto 35V for Battery charging detection
 $PFAL,IO2.Config=DI,3.0,8.0
 

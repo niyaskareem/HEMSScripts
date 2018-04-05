@@ -38,7 +38,7 @@ $PFAL,CNF.Set,MACRO4=Sys.Timer9.Start=Cyclic,300000
 $PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,3600000
 
 ///////////////Idling Time (Set desired idling time to nvCounter12 in seconds)
-$PFAL,CNF.Set,AL86=Sys.nvCounter.s13>=120&Sys.nvCounter.s4=1:Sys.nvCounter4.Set=2&TCP.Client.Send,0,"IDLS (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL86=Sys.nvCounter.s13>=900&Sys.nvCounter.s4=1:Sys.nvCounter4.Set=2&TCP.Client.Send,0,"IDLS (REPLACE1)(REPLACE2)(REPLACE3)"
 
 ///////////////Overspeed
 ////OverSpeed Handler
