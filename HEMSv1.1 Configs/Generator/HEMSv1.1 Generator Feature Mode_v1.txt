@@ -26,6 +26,15 @@
 //$PFAL,Sys.nvCounter0.Set=1
 
 ////////////////Customer Specific
+
+//Script name
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Generator-RW_v1.0
+
+//Communication
+$PFAL,CNF.Set,TCP.CLIENT.CONNECT=1,hems.roamworks.com,6102
+$PFAL,CNF.Set,GPRS.APN=m2m
+
+
 //MACROS
 //Power up timer
 $PFAL,CNF.Set,MACRO0=Sys.Timer2.Start=Single,180000

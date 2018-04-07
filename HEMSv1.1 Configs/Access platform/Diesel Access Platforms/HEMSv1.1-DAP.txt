@@ -35,7 +35,7 @@
 //										:	Added date and time to Fault events
 //										:	Improved powerloss filtering
 
-$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-DAP-RW_133ED65
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-DAP-RW_v1.0
 
 // ALIAS I/O mapping :
 $PFAL,CNF.Set,ALIAS.IO11=_DIAGLED
@@ -63,7 +63,7 @@ $PFAL,CNF.Set,MACRO5=Sys.Timer13.Start=Cyclic,300000
 
 // ROAM settings:
 $PFAL,CNF.Set,GSM.OPERATOR.SELECTION=auto
-$PFAL,CNF.Set,TCP.CLIENT.CONNECT=1,qaroam3.roamworks.com,6102
+$PFAL,CNF.Set,TCP.CLIENT.CONNECT=1,hems.roamworks.com,6102
 $PFAL,CNF.Set,GPRS.APN=m2m
 
 //Replaces (Message formats)

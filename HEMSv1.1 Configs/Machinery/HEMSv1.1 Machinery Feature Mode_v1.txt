@@ -27,6 +27,13 @@
 
 ////////////Customer Specific
 
+//Script name
+$PFAL,CNF.Set,DEVICE.NAME=HEMSv1.1-Machinery-RW_v1.0
+
+//Communications
+$PFAL,CNF.Set,TCP.CLIENT.CONNECT=1,hems.roamworks.com,6102
+$PFAL,CNF.Set,GPRS.APN=m2m
+
 //MACROS
 //Power up timer
 $PFAL,CNF.Set,MACRO0=Sys.Timer2.Start=Single,180000
@@ -45,7 +52,7 @@ $PFAL,CNF.Set,AL86=Sys.nvCounter.s13>=900&Sys.nvCounter.s4=1:Sys.nvCounter4.Set=
 ///////////////Overspeed
 ////OverSpeed Handler
 $PFAL,CNF.Set,AL91=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>23&GPS.Nav.sSpeed<56&GPS.Nav.sFix=valid&Sys.Counter.s5<4:Sys.Counter5.Increment=1
-$PFAL,CNF.Set,AL93=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>2&GPS.Nav.sSpeed<22&Sys.nvCounter.s7=2:Sys.nvCounter7.Set=1&Sys.Counter5.Set=0&TCP.Client.Send,0,"OSPE (REPLACE1)(REPLACE2)(REPLACE3)"
+$PFAL,CNF.Set,AL93=Sys.nvCounter.s0=2&GPS.Nav.sSpeed>2&GPS.Nav.sSpeed<22&Sys.nvCounter.s7=2:Sys.Counter5.Set=0&Sys.nvCounter7.Set=1&TCP.Client.Send,0,"OSPE (REPLACE1)(REPLACE2)(REPLACE3)"
 //Overspeed setting as per customer requirement needs to be set in m/s onto nvCounter 11
 $PFAL,CNF.Set,AL5=Sys.nvCounter.s11=0:Sys.nvCounter11.Set=23
 
