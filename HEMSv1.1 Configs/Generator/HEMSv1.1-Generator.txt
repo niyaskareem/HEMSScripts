@@ -262,7 +262,7 @@ $PFAL,CNF.Set,AL77=Sys.Timer.e9&Sys.nvCounter.s6=2:TCP.Client.Send,0,"TOWP (REPL
 ////TCP Disconnection (Automatic Reboot)
 
 $PFAL,CNF.Set,AL81=TCP.Client.sDisconnected&SYS.TIMER.s4=inactive&Sys.nvCounter.s2=1:Sys.nvCounter2.Set=2&SYS.TIMER4.start=single,1800000
-$PFAL,CNF.Set,AL82=TCP.Client.sConnected&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&SYS.TIMER6.stop
+$PFAL,CNF.Set,AL82=TCP.Client.sConnected&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&SYS.TIMER4.stop
 $PFAL,CNF.Set,AL83=SYS.TIMER.e4&Sys.nvCounter.s2=2:Sys.nvCounter2.Set=1&Sys.device.reset,2
 $PFAL,CNF.Set,AL84
 
